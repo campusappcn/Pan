@@ -1,46 +1,39 @@
 package cn.campusapp.pan;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import butterknife.ButterKnife;
+import cn.campusapp.pan.annotaions.Xml;
 
 
 /**
+ * 兼具ViewModel和ViewHolder功能
+ * <p/>
+ * 需要一个无参构造方法
+ * <p/>
  * Created by nius on 7/17/15.
- *
  */
-public abstract class GeneralViewModel<T extends GeneralViewHolder> implements FactoryViewModel {
-
-    private Class<T> mViewHolderClazz;
-
-    protected T $v;
+public abstract class GeneralViewModel implements FactoryViewModel {
 
     protected Activity mActivity;
+     protected GeneralController mController;
+     protected PanFragmentV4 mFragment;
 
-    protected GeneralController mController;
 
-    protected PanFragmentV4 mFragment;
-
-    /**
-     * 无参构造函数一定要存在
-     */
-    public GeneralViewModel(){
-
-    }
-
-    /**
-     * ViewHolder准备完毕
-     */
-    protected void onInit(){}
-
-    @Override
-    public void setController(GeneralController c) {
-        mController = c;
+    public GeneralViewModel() {
     }
 
     @Override
@@ -48,83 +41,34 @@ public abstract class GeneralViewModel<T extends GeneralViewHolder> implements F
         return mController;
     }
 
-    /**
-     * 会给这个View设置Tag，并进行重用，可以用于Adapter
-     * 会给View设置Tag一个名为KEY_TAG的Tag，指向this
-     *
-     * @param context
-     * @param parent
-     * @param view
-     * @param attach
-     */
     @Override
-    public void initViewModel(@NonNull Activity context, @NonNull ViewGroup parent, @Nullable View view, boolean attach){
-        mActivity = context;
-
-//        Timber.d("使用parent实例化了一个ViewModel");
-        instantiateViewHolder();
-
-        if(view == null) {
-            $v.initWithoutView(context, parent, attach);
-        }else{
-            $v.init(view);
-        }
-        onInit();
+    public void setController(GeneralController c) {
+        mController = c;
     }
 
-    /**
-     * 会给View设置Tag一个名为KEY_TAG的Tag，指向this
-     *
-     * @param activity
-     */
     @Override
-    public void initViewModel(@NonNull Activity activity){
+    public void initViewModel(@NonNull Activity context, @Nullable ViewGroup parent, @Nullable View view, boolean attach) {
+        mActivity = context;
+
+        if (view == null) {
+            initWithoutView(context, parent, attach);
+        } else {
+            init(view);
+        }
+    }
+
+    @Override
+    public void initViewModel(@NonNull Activity activity) {
         mActivity = activity;
-        instantiateViewHolder();
-        $v.init(activity);
-        onInit();
+        init(activity);
     }
 
-    /**
-     * 针对已经实例化好View的
-     * 会给View设置Tag一个名为KEY_TAG的Tag，指向this
-     *
-     * @param context
-     * @param container
-     */
     @Override
-    public void initViewModel(@NonNull Activity context, @NonNull View container){
+    public void initViewModel(@NonNull Activity context, @NonNull View container) {
         mActivity = context;
 
-        if(container == null){
-            throw new RuntimeException("你想好了没有啊，就乱写");
-        }
+        init(container);
 
-        instantiateViewHolder();
-        $v.init(container);
-        onInit();
-    }
-
-    private Class<T> getViewHolderClazz() {
-        if(mViewHolderClazz == null){
-            Type type = getClass().getGenericSuperclass();
-            ParameterizedType paramType = (ParameterizedType) type;
-            mViewHolderClazz = (Class<T>) paramType.getActualTypeArguments()[0];
-        }
-        return mViewHolderClazz;
-    }
-
-    private void instantiateViewHolder() {
-        try {
-            $v = getViewHolderClazz().newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException("你想好了没有啊，就乱写", e);
-        }
-    }
-
-    @Override
-    public T getViewHolder() {
-        return $v;
     }
 
     @Override
@@ -133,7 +77,7 @@ public abstract class GeneralViewModel<T extends GeneralViewHolder> implements F
     }
 
     @Override
-    public PanFragmentV4 getFragment() {
+    public PanFragmentV4 getFragmentV4() {
         return mFragment;
     }
 
@@ -142,16 +86,93 @@ public abstract class GeneralViewModel<T extends GeneralViewHolder> implements F
         mFragment = fragment;
     }
 
+    public View mRootView = null;
+
+    public void init(Activity activity){
+        init(activity.getWindow().getDecorView());
+    }
+
     /**
-     * 当meta数据可用时
+     * 如果view没有创建好，这边自己inflat一个
+     * 如果你是Activity，请不要使用这个！
      */
-    @Override
-    public void onMetaBind() {
+    public View initWithoutView(Context context, ViewGroup parent){
+        init(
+                LayoutInflater.from(context).inflate(getLayout(), parent)
+        );
+        return mRootView;
+    }
+
+    /**
+     * 如果view没有创建好，这边自己inflat一个
+     * 如果你是Activity，请不要使用这个！
+     *
+     * @param attach 对于Fragment和Adapter，一般attach都直接传false，如果是动态生成View的场景，可以传true
+     */
+    public View initWithoutView(Context context, ViewGroup parent, boolean attach){
+        init(
+                LayoutInflater.from(context).inflate(getLayout(), parent, attach)
+        );
+        return mRootView;
+    }
+
+    /**
+     * 可以在Activity、Fragment、Adapter.getView中使用。
+     * 注意，在Adapter中，只需要在创建时init一次，后续重用即可
+     *
+     * @param root
+     */
+    public void init(View root){
+        mRootView = root;
+        injectViews(root);
+        onInit();
+    }
+
+    /**
+     * 在注入了views之后会被调用，允许子类进行一些初始化操作
+     */
+    protected void onInit(){
 
     }
 
-    @Override
-    public View getRootView() {
-        return $v.getRootView();
+    public static List<Field> getAllFields(Class<?> type){
+        return getAllFields(new ArrayList<Field>(), type);
+    }
+
+    private static List<Field> getAllFields(List<Field> fields, Class<?> type) {
+        fields.addAll(Arrays.asList(type.getDeclaredFields()));
+
+        if (type.getSuperclass() != null) {
+            fields = getAllFields(fields, type.getSuperclass());
+        }
+
+        return fields;
+    }
+
+    @LayoutRes
+    public int getLayout() {
+//        this.getClass().getAnnotation(Xml.class).value();
+        Class clazz = this.getClass();
+        Xml annotation = (Xml) clazz.getAnnotation(Xml.class);
+        while (annotation == null) {
+            clazz = clazz.getSuperclass();
+            if (clazz == null) {
+                throw new RuntimeException("Can't find layout.");
+            }
+            annotation = (Xml) clazz.getAnnotation(Xml.class);
+        }
+        return annotation.value();
+    }
+
+    /**
+     * 用于在整体绑定事件
+     * @return
+     */
+    public View getRootView(){
+        return mRootView;
+    }
+
+    protected void injectViews(View root) {
+        ButterKnife.bind(this, root);
     }
 }

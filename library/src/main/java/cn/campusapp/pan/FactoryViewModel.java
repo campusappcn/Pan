@@ -18,17 +18,14 @@ public interface FactoryViewModel extends ViewModel {
 
     void initViewModel(@NonNull Activity context, @NonNull View container);
 
-    GeneralViewHolder getViewHolder();
-
     GeneralController getController();
 
     void setController(GeneralController c);
 
     Activity getActivity();
 
-    PanFragmentV4 getFragment();
+    PanFragmentV4 getFragmentV4();
 
     void setFragment(PanFragmentV4 fragment);
 
-    void onMetaBind();
 }

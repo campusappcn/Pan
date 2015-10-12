@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,10 +22,6 @@ import cn.campusapp.pan.autorender.AutoRenderedViewModel;
 import cn.campusapp.pan.iteraction.OnBackPressed;
 import cn.campusapp.pan.iteraction.OnKeyDown;
 import cn.campusapp.pan.iteraction.OnKeyUp;
-import cn.campusapp.pan.lifecycle.ActivityLifecycleObserver;
-import cn.campusapp.pan.lifecycle.FragmentLifecycleObserver;
-import cn.campusapp.pan.lifecycle.LifecycleObserved;
-import cn.campusapp.pan.lifecycle.LifecycleObserver;
 import cn.campusapp.pan.lifecycle.OnActivityResult;
 import cn.campusapp.pan.lifecycle.OnDestroyActivity;
 import cn.campusapp.pan.lifecycle.OnDestroyViewFragment;
@@ -51,7 +46,7 @@ public class Pan<S extends FactoryViewModel> {
     /**
      * Controller会被加入到这里，从而对相应的Activity进行监听
      */
-    static Map<Activity, List<Controller>> ACTIVITY_CONTROLLER_MAP = new HashMap<Activity, List<Controller>>() {
+    final static Map<Activity, List<Controller>> ACTIVITY_CONTROLLER_MAP = new HashMap<Activity, List<Controller>>() {
         @Override
         public List<Controller> get(Object key) {
             if (null == super.get(key)) {
@@ -61,7 +56,7 @@ public class Pan<S extends FactoryViewModel> {
         }
     };
     // region Fragment的生命周期
-    static Map<PanFragmentV4, List<Controller>> FRAGMENT_CONTROLLER_MAP = new HashMap<PanFragmentV4, List<Controller>>() {
+    final static Map<PanFragmentV4, List<Controller>> FRAGMENT_CONTROLLER_MAP = new HashMap<PanFragmentV4, List<Controller>>() {
         @Override
         public List<Controller> get(Object key) {
             if (null == super.get(key)) {
@@ -70,8 +65,9 @@ public class Pan<S extends FactoryViewModel> {
             return super.get(key);
         }
     };
+
     Activity activity;
-    PanFragmentV4 fragment;
+    PanFragmentV4 fragmentV4;
     Class<S> viewModelClazz;
     Class<? extends GeneralController> controllerClazz;
 
@@ -96,14 +92,12 @@ public class Pan<S extends FactoryViewModel> {
      * @param <S>
      * @return
      */
-    public static <S extends FactoryViewModel> Pan<S> with(@NonNull Activity activity, @NonNull Class<S> clazz) {
+    public static <S extends FactoryViewModel> Pan<S> with(@NonNull PanActivityV4 activity, @NonNull Class<S> clazz) {
         Pan<S> f = new Pan<>();
         f.activity = activity;
         f.viewModelClazz = clazz;
         return f;
     }
-
-
 
     /**
      * 获得工厂，用于实例化
@@ -116,11 +110,214 @@ public class Pan<S extends FactoryViewModel> {
     public static <S extends FactoryViewModel> Pan<S> with(@NonNull PanFragmentV4 fragment, @NonNull Class<S> clazz) {
         Pan<S> f = new Pan<>();
         f.activity = fragment.getActivity();
-        f.fragment = fragment;
+        f.fragmentV4 = fragment;
         f.viewModelClazz = clazz;
         return f;
     }
 
+    /**
+     * 设置controller
+     *
+     * @param controllerClazz
+     * @return
+     */
+    public Pan<S> controlledBy(Class<? extends GeneralController> controllerClazz) {
+        if (controllerClazz != null) {
+            try {
+                this.controllerClazz = controllerClazz;
+                this.controllerClazz.getDeclaredConstructor().setAccessible(true);
+            } catch (Exception e) {
+                throw new RuntimeException(
+                        e);
+            }
+        }
+        return this;
+    }
+
+
+    /**
+     * 清空这个view的tag，这样可以确保重新实例化一个ViewModel而不使用之前的
+     * <p/>
+     * 默认使用R.id.TAG_GENERAL_VIEW_MODEL，如果要重新指定TagKey，请使用tagKey(int)
+     *
+     * @param view
+     * @return
+     */
+    public Pan<S> resetTag(View view) {
+        view.setTag(getTagKey(), null);
+        return this;
+    }
+
+    /**
+     * 设置ViewModel绑定到View上时，使用的tag mKey
+     * 默认使用的是R.id.TAG_GENERAL_VIEW_MODEL
+     *
+     * @param key
+     * @return
+     */
+    public Pan<S> tagKey(@IdRes int key) {
+        tagKey = key;
+        return this;
+    }
+
+    int getTagKey() {
+        return tagKey < 0 ? R.id.TAG_GENERAL_VIEW_MODEL : tagKey;
+    }
+
+    // region getViewModel (builder method)
+
+    /**
+     * 如果container的Tag已经有了，就直接返回
+     * 否则实例化一个新的viewmodel
+     *
+     * @param rootView
+     * @return
+     */
+    public S getViewModel(@NonNull View rootView) {
+        try {
+            if (rootView.getTag(getTagKey()) != null && rootView.getTag(getTagKey()).getClass().equals(viewModelClazz)) {
+                return (S) rootView.getTag(getTagKey()); //init 方法会设置Tag
+            }
+
+//            Timber.v("实例化新的ViewModel %s", rootView.toString());
+
+            FactoryViewModel vm = viewModelClazz.newInstance();
+
+            vm.setFragment(fragmentV4);
+
+            vm.initViewModel(activity, rootView);
+            vm.getRootView().setTag(getTagKey(), vm);
+
+            bindController(vm);
+
+            return (S) vm;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    /**
+     * 如果view存在且Tag已经有了，就直接返回
+     * <p/>
+     * 其他情况都会新实例化一个新的viewmodel对象
+     *
+     * @param parent
+     * @param view
+     * @param attach
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public S getViewModel(@Nullable ViewGroup parent, @Nullable View view, boolean attach) {
+        try {
+
+            if (view != null && view.getTag(getTagKey()) != null && view.getTag(getTagKey()).getClass().equals(viewModelClazz)) {
+                return (S) view.getTag(getTagKey()); //init 方法会设置Tag
+            }
+
+            if (parent != null) {
+//                Timber.v("实例化新的ViewModel %s", parent.toString());
+            }
+
+            Constructor<S> cons = viewModelClazz.getDeclaredConstructor(); //无参构造函数
+            cons.setAccessible(true);
+            FactoryViewModel vm = cons.newInstance();
+
+            vm.setFragment(fragmentV4);
+
+            vm.initViewModel(activity, parent, view, attach);
+            vm.getRootView().setTag(getTagKey(), vm);
+
+
+            bindController(vm);
+
+            return (S) vm;
+        } catch (Exception e) {
+//            Timber.e(e, e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void bindController(FactoryViewModel vm) {
+        GeneralController contr = vm.getController();
+
+        if (contr == null && controllerClazz != null) {
+            try {
+                contr = controllerClazz.newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        if ((contr == null || !(contr instanceof AutoRenderedController))
+                && vm instanceof AutoRenderedViewModel) {
+            throw new RuntimeException("AutoRenderedViewModel必须要有一个AutoRenderedController，例如AutoRenderedFragmentController，或者AutoRenderedActivityController");
+        }
+
+        if (contr == null) {
+            return;
+        }
+
+        if(fragmentV4 == null){
+            ACTIVITY_CONTROLLER_MAP.get(activity).add(contr);
+        }else{
+            FRAGMENT_CONTROLLER_MAP.get(fragmentV4).add(contr);
+        }
+
+        //TODO 插件化
+//        if (contr instanceof EventBusActivityController) {
+//            if (!mBus.isRegistered(contr)) {
+//                mBus.register(contr);
+//            }
+//        }
+//
+//        if (contr instanceof EventBusFragmentController) {
+//            if (!mBus.isRegistered(contr)) {
+//                mBus.register(contr
+//                );
+//            }
+//        }
+
+
+        contr.bindViewModel(vm);
+        vm.setController(contr);
+    }
+
+    /**
+     * 适用于Activity获得ViewModel
+     * 如果之前实例化过，有Tag标签，就会直接返回之前的ViewModel对象
+     *
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public S getViewModel() {
+        try {
+            View root = activity.getWindow().getDecorView();
+            if (root != null && root.getTag(getTagKey()) != null && root.getTag(getTagKey()).getClass().equals(viewModelClazz)) {
+                return (S) root.getTag(getTagKey());
+            }
+            Constructor<S> cons = viewModelClazz.getDeclaredConstructor(); //无参构造函数
+            cons.setAccessible(true);
+            FactoryViewModel vm = cons.newInstance();
+
+            if (fragmentV4 != null) {
+                throw new RuntimeException("既然是用的Fragment，就要用getViewModel(parent, null, attach)");
+            }
+
+            vm.initViewModel(activity);
+            vm.getRootView().setTag(getTagKey(), vm);
+
+            bindController(vm);
+
+            return (S) vm;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // endregion
+
+    // region lifecycle callbacks
     static void onResume(Activity activity) {
         for (Controller listener : ACTIVITY_CONTROLLER_MAP.get(activity)) {
             if (listener instanceof OnResumeActivity) {
@@ -258,233 +455,5 @@ public class Pan<S extends FactoryViewModel> {
         return b;
     }
 
-
-    /**
-     * 清空这个view的tag，这样可以确保重新实例化一个ViewModel而不使用之前的
-     * <p/>
-     * 默认使用R.id.TAG_GENERAL_VIEW_MODEL，如果要重新指定TagKey，请使用tagKey(int)
-     *
-     * @param view
-     * @return
-     */
-    public Pan<S> resetTag(View view) {
-        view.setTag(getTagKey(), null);
-        return this;
-    }
-
-    /**
-     * 设置ViewModel绑定到View上时，使用的tag mKey
-     * 默认使用的是R.id.TAG_GENERAL_VIEW_MODEL
-     *
-     * @param key
-     * @return
-     */
-    public Pan<S> tagKey(@IdRes int key) {
-        tagKey = key;
-        return this;
-    }
-
-
-    // region Activity的生命周期监听
-
-    int getTagKey() {
-        return tagKey < 0 ? R.id.TAG_GENERAL_VIEW_MODEL : tagKey;
-    }
-
-    /**
-     * 设置controller
-     *
-     * @param controllerClazz
-     * @return
-     */
-    public Pan<S> controlledBy(Class<? extends GeneralController> controllerClazz) {
-        if (controllerClazz != null) {
-            try {
-                this.controllerClazz = controllerClazz;
-                this.controllerClazz.getDeclaredConstructor().setAccessible(true);
-            } catch (Exception e) {
-                throw new RuntimeException(
-                        e);
-            }
-        }
-        return this;
-    }
-
-    /**
-     * 如果container的Tag已经有了，就直接返回
-     * 否则实例化一个新的viewmodel
-     *
-     * @param rootView
-     * @return
-     */
-    public S getViewModel(@NonNull View rootView) {
-        try {
-            if (rootView.getTag(getTagKey()) != null && rootView.getTag(getTagKey()).getClass().equals(viewModelClazz)) {
-                return (S) rootView.getTag(getTagKey()); //init 方法会设置Tag
-            }
-
-//            Timber.v("实例化新的ViewModel %s", rootView.toString());
-
-            FactoryViewModel vm = viewModelClazz.newInstance();
-
-            vm.setFragment(fragment);
-
-            vm.initViewModel(activity, rootView);
-            vm.getViewHolder().getRootView().setTag(getTagKey(), vm);
-
-            bindController(vm);
-
-            return (S) vm;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void bindController(FactoryViewModel vm) {
-        GeneralController contr = vm.getController();
-
-        if (contr == null && controllerClazz != null) {
-            try {
-                contr = controllerClazz.newInstance();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        if ((contr == null || !(contr instanceof AutoRenderedController))
-                && vm instanceof AutoRenderedViewModel) {
-            throw new RuntimeException("AutoRenderedViewModel必须要有一个AutoRenderedController，例如AutoRenderedFragmentController，或者AutoRenderedActivityController");
-        }
-
-        if (contr == null) {
-            return;
-        }
-
-        boolean observeActivity = isObserveActivity(activity, contr);
-        boolean observeFragment = isObserveFragment(fragment, contr);
-
-        if (observeActivity && observeFragment) {
-            throw new RuntimeException(String.format("Controller[%s] 不能同时监听 Activity 和 Fragment 的生命周期", contr.getClass()));
-        }
-
-        if (observeActivity) {
-            ACTIVITY_CONTROLLER_MAP.get(activity).add(contr);
-        }
-
-        if (observeFragment) {
-            FRAGMENT_CONTROLLER_MAP.get(fragment).add(contr);
-        }
-
-        if (contr instanceof LifecycleObserver && !observeActivity && !observeFragment) {
-            throw new RuntimeException("Controller [%s] 不允许直接实现 LifecycleObserver 接口, 需要实现 FragmentLifecycleObserver/ActivityLifecycleObserver");
-        }
-
-        //TODO 插件化
-//        if (contr instanceof EventBusActivityController) {
-//            if (!mBus.isRegistered(contr)) {
-//                mBus.register(contr);
-//            }
-//        }
-//
-//        if (contr instanceof EventBusFragmentController) {
-//            if (!mBus.isRegistered(contr)) {
-//                mBus.register(contr
-//                );
-//            }
-//        }
-
-
-        contr.bindViewModel(vm);
-        vm.setController(contr);
-    }
-
-    private boolean isObserveActivity(Activity activity, Controller contr) {
-        return contr instanceof ActivityLifecycleObserver && activity instanceof LifecycleObserved;
-    }
-
-    private boolean isObserveFragment(Fragment fragment, Controller contr) {
-        boolean iso = contr instanceof FragmentLifecycleObserver;
-        if (iso && (fragment == null || !(fragment instanceof LifecycleObserved))) {
-            throw new RuntimeException("是一个Fragment的观察者，但是Fragment是null或者不是被观察的对象啊");
-        }
-        return iso;
-    }
-
-    /**
-     * 如果view存在且Tag已经有了，就直接返回
-     * <p/>
-     * 其他情况都会新实例化一个新的viewmodel对象
-     *
-     * @param parent
-     * @param view
-     * @param attach
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    public S getViewModel(@Nullable ViewGroup parent, @Nullable View view, boolean attach) {
-        try {
-
-            if (view != null && view.getTag(getTagKey()) != null && view.getTag(getTagKey()).getClass().equals(viewModelClazz)) {
-                return (S) view.getTag(getTagKey()); //init 方法会设置Tag
-            }
-
-            if (parent != null) {
-//                Timber.v("实例化新的ViewModel %s", parent.toString());
-            }
-
-            Constructor<S> cons = viewModelClazz.getDeclaredConstructor(); //无参构造函数
-            cons.setAccessible(true);
-            FactoryViewModel vm = cons.newInstance();
-
-            vm.setFragment(fragment);
-
-            vm.initViewModel(activity, parent, view, attach);
-            vm.getViewHolder().getRootView().setTag(getTagKey(), vm);
-
-
-            bindController(vm);
-
-            return (S) vm;
-        } catch (Exception e) {
-//            Timber.e(e, e.getMessage());
-            throw new RuntimeException(e);
-        }
-    }
-
     // endregion
-
-    /**
-     * 适用于Activity获得ViewModel
-     * 如果之前实例化过，有Tag标签，就会直接返回之前的ViewModel对象
-     *
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    public S getViewModel() {
-        try {
-            View root = activity.getWindow().getDecorView();
-            if (root != null && root.getTag(getTagKey()) != null && root.getTag(getTagKey()).getClass().equals(viewModelClazz)) {
-                return (S) root.getTag(getTagKey());
-            }
-            Constructor<S> cons = viewModelClazz.getDeclaredConstructor(); //无参构造函数
-            cons.setAccessible(true);
-            FactoryViewModel vm = cons.newInstance();
-
-            if (fragment != null) {
-                throw new RuntimeException("既然是用的Fragment，就要用getViewModel(parent, null, attach)");
-            }
-
-            vm.initViewModel(activity);
-            vm.getViewHolder().getRootView().setTag(getTagKey(), vm);
-
-            bindController(vm);
-
-            return (S) vm;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    // endregion
-
 }
