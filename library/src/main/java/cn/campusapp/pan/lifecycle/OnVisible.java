@@ -7,7 +7,7 @@ package cn.campusapp.pan.lifecycle;
  *
  * Created by nius on 7/22/15.
  */
-public interface OnVisibleFragment extends FragmentLifecycleObserver{
+public interface OnVisible extends LifecycleObserver, LifecycleObserver.FragmentOnly{
 
     /**
      * 注意，该方法调用时，有可能还没有onCreateView，所以此时很有可能会出异常

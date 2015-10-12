@@ -8,6 +8,6 @@ import android.content.Intent;
  *
  * Created by nius on 7/22/15.
  */
-public interface OnActivityResult extends ActivityLifecycleObserver {
+public interface OnActivityResult extends LifecycleObserver {
     void onActivityResult(int requestCode, int resultCode, Intent data);
 }

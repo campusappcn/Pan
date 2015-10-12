@@ -1,38 +1,31 @@
 package cn.campusapp.pan;
 
 import android.app.Activity;
-import android.content.Intent;
-import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.view.KeyEvent;
+import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cn.campusapp.library.BuildConfig;
 import cn.campusapp.library.R;
 import cn.campusapp.pan.autorender.AutoRenderedController;
 import cn.campusapp.pan.autorender.AutoRenderedViewModel;
-import cn.campusapp.pan.iteraction.OnBackPressed;
-import cn.campusapp.pan.iteraction.OnKeyDown;
-import cn.campusapp.pan.iteraction.OnKeyUp;
-import cn.campusapp.pan.lifecycle.OnActivityResult;
-import cn.campusapp.pan.lifecycle.OnDestroyActivity;
-import cn.campusapp.pan.lifecycle.OnDestroyViewFragment;
-import cn.campusapp.pan.lifecycle.OnPauseActivity;
-import cn.campusapp.pan.lifecycle.OnResumeActivity;
-import cn.campusapp.pan.lifecycle.OnResumeFragment;
-import cn.campusapp.pan.lifecycle.OnSaveOnRestoreActivity;
-import cn.campusapp.pan.lifecycle.OnStartActivity;
-import cn.campusapp.pan.lifecycle.OnStopActivity;
-import cn.campusapp.pan.lifecycle.OnViewCreatedFragment;
-import cn.campusapp.pan.lifecycle.OnVisibleFragment;
+import cn.campusapp.pan.interaction.OnBackPressed;
+import cn.campusapp.pan.lifecycle.LifecycleObserver;
+import cn.campusapp.pan.lifecycle.OnDestroy;
+import cn.campusapp.pan.lifecycle.OnDestroyView;
+import cn.campusapp.pan.lifecycle.OnRestoreInstanceState;
+import cn.campusapp.pan.lifecycle.OnSaveInstanceState;
 
 
 /**
@@ -42,6 +35,7 @@ import cn.campusapp.pan.lifecycle.OnVisibleFragment;
  *
  * @param <S>
  */
+@SuppressWarnings("ForLoopReplaceableByForEach")
 public class Pan<S extends FactoryViewModel> {
     /**
      * Controller会被加入到这里，从而对相应的Activity进行监听
@@ -56,7 +50,7 @@ public class Pan<S extends FactoryViewModel> {
         }
     };
     // region Fragment的生命周期
-    final static Map<PanFragmentV4, List<Controller>> FRAGMENT_CONTROLLER_MAP = new HashMap<PanFragmentV4, List<Controller>>() {
+    final static Map<PanFragmentV4, List<Controller>> FRAGMENTV4_CONTROLLER_MAP = new HashMap<PanFragmentV4, List<Controller>>() {
         @Override
         public List<Controller> get(Object key) {
             if (null == super.get(key)) {
@@ -65,6 +59,7 @@ public class Pan<S extends FactoryViewModel> {
             return super.get(key);
         }
     };
+    private static final String TAG = "Pan";
 
     Activity activity;
     PanFragmentV4 fragmentV4;
@@ -76,6 +71,15 @@ public class Pan<S extends FactoryViewModel> {
      * 如果没有设置，则使用R.id.TAG_GENERAL_VIEW_MODEL
      */
     int tagKey = -1;
+
+    /**
+     * 是否输入日志
+     */
+    private static boolean IS_DEBUG = BuildConfig.DEBUG;
+
+    public static void setDebug(boolean isDebug){
+        IS_DEBUG = isDebug;
+    }
 
     /**
      * 实例化请使用GeneralViewModel.with()
@@ -92,7 +96,7 @@ public class Pan<S extends FactoryViewModel> {
      * @param <S>
      * @return
      */
-    public static <S extends FactoryViewModel> Pan<S> with(@NonNull PanActivityV4 activity, @NonNull Class<S> clazz) {
+    public static <S extends FactoryViewModel> Pan<S> with(@NonNull PanFragmentActivity activity, @NonNull Class<S> clazz) {
         Pan<S> f = new Pan<>();
         f.activity = activity;
         f.viewModelClazz = clazz;
@@ -115,6 +119,125 @@ public class Pan<S extends FactoryViewModel> {
         return f;
     }
 
+    // region lifecycle callbacks
+
+    /**
+     * @param fragmentV4
+     * @param lifecycleClazz
+     * @param parameters
+     * @param <T>
+     * @return should call super method, only for {@link OnRestoreInstanceState}, {@link OnSaveInstanceState}, {@link cn.campusapp.pan.interaction.OnBackPressed}
+     */
+    static <T extends LifecycleObserver> boolean call(PanFragmentV4 fragmentV4, Class<T> lifecycleClazz, Object... parameters) {
+        boolean shouldCallSuper = true;
+        for (Controller controller : FRAGMENTV4_CONTROLLER_MAP.get(fragmentV4)) {
+            shouldCallSuper = shouldCallSuper && checkAndCall(lifecycleClazz, controller, parameters);
+        }
+        if (lifecycleClazz.equals(OnDestroyView.class)) {
+            //由于Fragment的绑定一般都在onCreateView中，所以认为onDestroyView，该Fragment的生命周期已结束
+            FRAGMENTV4_CONTROLLER_MAP.remove(fragmentV4);
+        }
+        return shouldCallSuper;
+    }
+
+    /**
+     * @param activity activity that has no Fragments. if it has, use PanActivityV4
+     * @param lifecycleClazz
+     * @param parameters
+     * @param <T>
+     * @return should call super method, only for {@link OnRestoreInstanceState}, {@link OnSaveInstanceState}, {@link cn.campusapp.pan.interaction.OnBackPressed}
+     */
+    static <T extends LifecycleObserver> boolean call(PanActivity activity, Class<T> lifecycleClazz, Object... parameters) {
+        boolean shouldCallSuper = true;
+        for (Controller controller : ACTIVITY_CONTROLLER_MAP.get(activity)) {
+            shouldCallSuper = shouldCallSuper && checkAndCall(lifecycleClazz, controller, parameters);
+        }
+
+        if (lifecycleClazz.equals(OnDestroy.class)) {
+            //已经destroy了，果取关
+            ACTIVITY_CONTROLLER_MAP.remove(activity);
+        }
+        return shouldCallSuper;
+    }
+
+    /**
+     * @param activity
+     * @param lifecycleClazz
+     * @param parameters
+     * @param <T>
+     * @return should call super method, only for {@link OnRestoreInstanceState}, {@link OnSaveInstanceState}, {@link cn.campusapp.pan.interaction.OnBackPressed}
+     */
+    static <T extends LifecycleObserver> boolean call(PanFragmentActivity activity, Class<T> lifecycleClazz, Object... parameters) {
+        boolean shouldCallSuper = true;
+        for (Controller controller : ACTIVITY_CONTROLLER_MAP.get(activity)) {
+            shouldCallSuper = shouldCallSuper && checkAndCall(lifecycleClazz, controller, parameters);
+        }
+
+        //call onBackPressed for associated Fragments
+        if (lifecycleClazz.equals(OnBackPressed.class)) {
+            onBackPressedForFragmentV4(activity);
+        }
+
+        if (lifecycleClazz.equals(OnDestroy.class)) {
+            //已经destroy了，果取关
+            ACTIVITY_CONTROLLER_MAP.remove(activity);
+        }
+        return shouldCallSuper;
+    }
+
+    private static void onBackPressedForFragmentV4(FragmentActivity activity) {
+        for (android.support.v4.app.Fragment sf: activity.getSupportFragmentManager().getFragments()) {
+            if(sf instanceof PanFragmentV4) {
+                call((PanFragmentV4)sf, OnBackPressed.class);
+            }
+        }
+    }
+
+    /**
+     * call the controller if it is instance of lifecycleClazz
+     *
+     * @param lifecycleClazz the lifecycle clazz that should call
+     * @param controller     the controller may be called
+     * @param parameters     the parameters for the lifecycle method
+     * @return whether should call super lifecycle method, only for {@link OnRestoreInstanceState}, {@link OnSaveInstanceState}, {@link cn.campusapp.pan.interaction.OnBackPressed}
+     */
+    private static <T extends LifecycleObserver> boolean checkAndCall(Class<T> lifecycleClazz, Controller controller, Object[] parameters) {
+        if (lifecycleClazz.isInstance(controller)) {
+
+            String methodName = getMethodName(lifecycleClazz);
+
+            // if any callback returns a boolean, && that result
+            boolean shouldCallSuper = true;
+
+            //invoke the method with the same name
+            Method[] methods = lifecycleClazz.getMethods();
+            for (int i = 0; i < methods.length; i++) {
+                if (methods[i].getName().equals(methodName)) {
+                    try {
+                        Object result = methods[i].invoke(controller, parameters);
+                        if (result != null && result instanceof Boolean) {
+                            shouldCallSuper = shouldCallSuper && (boolean) result;
+                        }
+                    } catch (Exception e) {
+                        if (BuildConfig.DEBUG) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+            }
+            return shouldCallSuper;
+        }
+        return true;
+    }
+
+    @NonNull
+    private static <T extends LifecycleObserver> String getMethodName(Class<T> lifecycleClazz) {
+        char[] methodNameChars = lifecycleClazz.getSimpleName().toCharArray();
+        methodNameChars[0] = Character.toLowerCase(methodNameChars[0]);
+        return new String(methodNameChars);
+    }
+
+
     /**
      * 设置controller
      *
@@ -134,6 +257,9 @@ public class Pan<S extends FactoryViewModel> {
         return this;
     }
 
+    // endregion
+
+    // region tag
 
     /**
      * 清空这个view的tag，这样可以确保重新实例化一个ViewModel而不使用之前的
@@ -164,7 +290,10 @@ public class Pan<S extends FactoryViewModel> {
         return tagKey < 0 ? R.id.TAG_GENERAL_VIEW_MODEL : tagKey;
     }
 
+    // endregion
+
     // region getViewModel (builder method)
+
 
     /**
      * 如果container的Tag已经有了，就直接返回
@@ -195,7 +324,6 @@ public class Pan<S extends FactoryViewModel> {
             throw new RuntimeException(e);
         }
     }
-
 
     /**
      * 如果view存在且Tag已经有了，就直接返回
@@ -258,10 +386,16 @@ public class Pan<S extends FactoryViewModel> {
             return;
         }
 
-        if(fragmentV4 == null){
+        if (fragmentV4 == null) {
             ACTIVITY_CONTROLLER_MAP.get(activity).add(contr);
-        }else{
-            FRAGMENT_CONTROLLER_MAP.get(fragmentV4).add(contr);
+            if(contr instanceof LifecycleObserver.FragmentOnly && IS_DEBUG){
+                Log.w(TAG, "controller " + contr.getClass().getSimpleName() + " is observing to Fragment-only lifecycle, but use in an Activity context");
+            }
+        } else {
+            FRAGMENTV4_CONTROLLER_MAP.get(fragmentV4).add(contr);
+            if(contr instanceof LifecycleObserver.ActivityOnly && IS_DEBUG){
+                Log.w(TAG, "controller " + contr.getClass().getSimpleName() + " is observing to Activity-only lifecycle, but use in a Fragment context");
+            }
         }
 
         //TODO 插件化
@@ -313,146 +447,6 @@ public class Pan<S extends FactoryViewModel> {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    // endregion
-
-    // region lifecycle callbacks
-    static void onResume(Activity activity) {
-        for (Controller listener : ACTIVITY_CONTROLLER_MAP.get(activity)) {
-            if (listener instanceof OnResumeActivity) {
-                ((OnResumeActivity) listener).onResume();
-            }
-        }
-    }
-
-    static void onResume(PanFragmentV4 fragment) {
-        for (Controller controller : FRAGMENT_CONTROLLER_MAP.get(fragment)) {
-            if (controller instanceof OnResumeFragment) {
-                ((OnResumeFragment) controller).onResume();
-            }
-        }
-    }
-
-    static void onStart(Activity activity) {
-        for (Controller listener : ACTIVITY_CONTROLLER_MAP.get(activity)) {
-            if (listener instanceof OnStartActivity) {
-                ((OnStartActivity) listener).onStart();
-            }
-        }
-    }
-
-    static void onStop(Activity activity) {
-        for (Controller listener : ACTIVITY_CONTROLLER_MAP.get(activity)) {
-            if (listener instanceof OnStopActivity) {
-                ((OnStopActivity) listener).onStop();
-            }
-        }
-    }
-
-    static void onPause(Activity activity) {
-        for (Controller listener : ACTIVITY_CONTROLLER_MAP.get(activity)) {
-            if (listener instanceof OnPauseActivity) {
-                ((OnPauseActivity) listener).onPause();
-            }
-        }
-    }
-
-    static void onKeyDown(Activity activity, int keyCode, KeyEvent event) {
-        for (Controller listener : ACTIVITY_CONTROLLER_MAP.get(activity)) {
-            if (listener instanceof OnKeyDown) {
-                ((OnKeyDown) listener).onKeyDown(keyCode, event);
-            }
-        }
-    }
-
-    static void onKeyUp(Activity activity, int keyCode, KeyEvent event) {
-        for (Controller listener : ACTIVITY_CONTROLLER_MAP.get(activity)) {
-            if (listener instanceof OnKeyUp) {
-                ((OnKeyUp) listener).onKeyUp(keyCode, event);
-            }
-        }
-    }
-
-    static void onBackPressed(Activity activity) {
-        for (Controller listener : ACTIVITY_CONTROLLER_MAP.get(activity)) {
-            if (listener instanceof OnBackPressed) {
-                ((OnBackPressed) listener).onBackPressed();
-            }
-        }
-    }
-
-
-    static void onDestroy(Activity activity) {
-        for (Controller listener : ACTIVITY_CONTROLLER_MAP.get(activity)) {
-            if (listener instanceof OnDestroyActivity) {
-                ((OnDestroyActivity) listener).onDestroy();
-            }
-        }
-        //已经destroy了，果取关
-        ACTIVITY_CONTROLLER_MAP.remove(activity);
-    }
-
-    static void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
-        for (Controller listener : ACTIVITY_CONTROLLER_MAP.get(activity)) {
-            if (listener instanceof OnActivityResult) {
-                ((OnActivityResult) listener).onActivityResult(requestCode, resultCode, data);
-            }
-        }
-    }
-
-    static void setUserVisibleHint(PanFragmentV4 fragment, boolean isVisibleToUser) {
-        for (Controller listener : FRAGMENT_CONTROLLER_MAP.get(fragment)) {
-            if (listener instanceof OnVisibleFragment) {
-                ((OnVisibleFragment) listener).onVisible(isVisibleToUser);
-            }
-        }
-    }
-
-    static void onViewCreated(PanFragmentV4 fragment, View view, Bundle bundle) {
-        for (Controller listener : FRAGMENT_CONTROLLER_MAP.get(fragment)) {
-            if (listener instanceof OnViewCreatedFragment) {
-                ((OnViewCreatedFragment) listener).onViewCreated(view, bundle);
-            }
-        }
-    }
-
-    static void onDestroyView(PanFragmentV4 fragment) {
-        for (Controller listener : FRAGMENT_CONTROLLER_MAP.get(fragment)) {
-            if (listener instanceof OnDestroyViewFragment) {
-                ((OnDestroyViewFragment) listener).onDestroyView();
-            }
-        }
-
-        //由于Fragment的绑定一般都在onCreateView中，所以认为onDestroyView，该Fragment的生命周期已结束
-        FRAGMENT_CONTROLLER_MAP.remove(fragment);
-    }
-
-
-    /**
-     * @return should call super
-     */
-    static boolean onRestoreInstanceState(Activity activity, Bundle savedInstanceState) {
-        boolean b = true;
-        for (Controller c : ACTIVITY_CONTROLLER_MAP.get(activity)) {
-            if (c instanceof OnSaveOnRestoreActivity) {
-                b = b && ((OnSaveOnRestoreActivity) c).onRestoreInstanceState(savedInstanceState);
-            }
-        }
-        return b;
-    }
-
-    /**
-     * @return should call super
-     */
-    static boolean onSaveInstanceState(Activity activity, Bundle outState) {
-        boolean b = true;
-        for (Controller c : ACTIVITY_CONTROLLER_MAP.get(activity)) {
-            if (c instanceof OnSaveOnRestoreActivity) {
-                b = b && ((OnSaveOnRestoreActivity) c).onSaveInstanceState(outState);
-            }
-        }
-        return b;
     }
 
     // endregion
