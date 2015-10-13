@@ -7,4 +7,6 @@ package cn.campusapp.pan;
  */
 public interface Controller {
 
+    ViewModel getViewModel();
+
 }

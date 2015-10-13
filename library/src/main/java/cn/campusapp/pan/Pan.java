@@ -9,6 +9,9 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -18,10 +21,10 @@ import java.util.Map;
 
 import cn.campusapp.library.BuildConfig;
 import cn.campusapp.library.R;
-import cn.campusapp.pan.autorender.AutoRenderedController;
-import cn.campusapp.pan.autorender.AutoRenderedViewModel;
+import cn.campusapp.pan.autorender.AutoRenderLifecyclePlugin;
 import cn.campusapp.pan.interaction.OnBackPressed;
 import cn.campusapp.pan.lifecycle.LifecycleObserver;
+import cn.campusapp.pan.lifecycle.LifecyclePlugin;
 import cn.campusapp.pan.lifecycle.OnDestroy;
 import cn.campusapp.pan.lifecycle.OnDestroyView;
 import cn.campusapp.pan.lifecycle.OnRestoreInstanceState;
@@ -37,35 +40,46 @@ import cn.campusapp.pan.lifecycle.OnSaveInstanceState;
  */
 @SuppressWarnings("ForLoopReplaceableByForEach")
 public class Pan<S extends FactoryViewModel> {
+
+    public final static Logger LOG = LoggerFactory.getLogger(Pan.class);
+
+    public final static List<LifecyclePlugin> PLUGINS = new ArrayList<LifecyclePlugin>(){
+        {
+            add(new AutoRenderLifecyclePlugin());
+        }
+    };
+
     /**
      * Controller会被加入到这里，从而对相应的Activity进行监听
      */
-    final static Map<Activity, List<Controller>> ACTIVITY_CONTROLLER_MAP = new HashMap<Activity, List<Controller>>() {
+    final static Map<Activity, List<GeneralController>> ACTIVITY_CONTROLLER_MAP = new HashMap<Activity, List<GeneralController>>() {
         @Override
-        public List<Controller> get(Object key) {
+        public List<GeneralController> get(Object key) {
             if (null == super.get(key)) {
-                put((Activity) key, new ArrayList<Controller>());
+                put((Activity) key, new ArrayList<GeneralController>());
             }
             return super.get(key);
         }
     };
     // region Fragment的生命周期
-    final static Map<PanFragmentV4, List<Controller>> FRAGMENTV4_CONTROLLER_MAP = new HashMap<PanFragmentV4, List<Controller>>() {
+    final static Map<PanFragmentV4, List<GeneralController>> FRAGMENTV4_CONTROLLER_MAP = new HashMap<PanFragmentV4, List<GeneralController>>() {
         @Override
-        public List<Controller> get(Object key) {
+        public List<GeneralController> get(Object key) {
             if (null == super.get(key)) {
-                put((PanFragmentV4) key, new ArrayList<Controller>());
+                put((PanFragmentV4) key, new ArrayList<GeneralController>());
             }
             return super.get(key);
         }
     };
     private static final String TAG = "Pan";
-
+    /**
+     * 是否输入日志
+     */
+    private static boolean IS_DEBUG = BuildConfig.DEBUG;
     Activity activity;
     PanFragmentV4 fragmentV4;
     Class<S> viewModelClazz;
     Class<? extends GeneralController> controllerClazz;
-
     /**
      * 用于指定setTag中的tag
      * 如果没有设置，则使用R.id.TAG_GENERAL_VIEW_MODEL
@@ -73,19 +87,14 @@ public class Pan<S extends FactoryViewModel> {
     int tagKey = -1;
 
     /**
-     * 是否输入日志
-     */
-    private static boolean IS_DEBUG = BuildConfig.DEBUG;
-
-    public static void setDebug(boolean isDebug){
-        IS_DEBUG = isDebug;
-    }
-
-    /**
      * 实例化请使用GeneralViewModel.with()
      * 或其他ViewModel的对应方法
      */
     Pan() {
+    }
+
+    public static void setDebug(boolean isDebug) {
+        IS_DEBUG = isDebug;
     }
 
     /**
@@ -137,11 +146,13 @@ public class Pan<S extends FactoryViewModel> {
             //由于Fragment的绑定一般都在onCreateView中，所以认为onDestroyView，该Fragment的生命周期已结束
             FRAGMENTV4_CONTROLLER_MAP.remove(fragmentV4);
         }
+
         return shouldCallSuper;
     }
 
+
     /**
-     * @param activity activity that has no Fragments. if it has, use PanActivityV4
+     * @param activity       activity that has no Fragments. if it has, use PanActivityV4
      * @param lifecycleClazz
      * @param parameters
      * @param <T>
@@ -151,6 +162,7 @@ public class Pan<S extends FactoryViewModel> {
         boolean shouldCallSuper = true;
         for (Controller controller : ACTIVITY_CONTROLLER_MAP.get(activity)) {
             shouldCallSuper = shouldCallSuper && checkAndCall(lifecycleClazz, controller, parameters);
+            callPlugins(lifecycleClazz, controller, parameters);
         }
 
         if (lifecycleClazz.equals(OnDestroy.class)) {
@@ -171,6 +183,8 @@ public class Pan<S extends FactoryViewModel> {
         boolean shouldCallSuper = true;
         for (Controller controller : ACTIVITY_CONTROLLER_MAP.get(activity)) {
             shouldCallSuper = shouldCallSuper && checkAndCall(lifecycleClazz, controller, parameters);
+
+            callPlugins(lifecycleClazz, controller, parameters);
         }
 
         //call onBackPressed for associated Fragments
@@ -185,24 +199,35 @@ public class Pan<S extends FactoryViewModel> {
         return shouldCallSuper;
     }
 
+    private static <T extends LifecycleObserver> void callPlugins(Class<T> lifecycleClazz, Controller controller, Object[] parameters) {
+        for (LifecyclePlugin plugin: PLUGINS){
+            plugin.call(controller, lifecycleClazz, parameters);
+        }
+    }
+
     private static void onBackPressedForFragmentV4(FragmentActivity activity) {
-        for (android.support.v4.app.Fragment sf: activity.getSupportFragmentManager().getFragments()) {
-            if(sf instanceof PanFragmentV4) {
-                call((PanFragmentV4)sf, OnBackPressed.class);
+        for (android.support.v4.app.Fragment sf : activity.getSupportFragmentManager().getFragments()) {
+            if (sf instanceof PanFragmentV4) {
+                call((PanFragmentV4) sf, OnBackPressed.class);
             }
         }
+    }
+
+    private static <T extends LifecycleObserver> boolean checkAndCall(Class<T> lifecycleClazz, Controller controller, Object[] parameters) {
+        return !(controller instanceof LifecycleObserver) ||
+                checkAndCall(lifecycleClazz, (LifecycleObserver) controller, parameters);
     }
 
     /**
      * call the controller if it is instance of lifecycleClazz
      *
      * @param lifecycleClazz the lifecycle clazz that should call
-     * @param controller     the controller may be called
+     * @param lifecycleObserver     the controller may be called
      * @param parameters     the parameters for the lifecycle method
      * @return whether should call super lifecycle method, only for {@link OnRestoreInstanceState}, {@link OnSaveInstanceState}, {@link cn.campusapp.pan.interaction.OnBackPressed}
      */
-    private static <T extends LifecycleObserver> boolean checkAndCall(Class<T> lifecycleClazz, Controller controller, Object[] parameters) {
-        if (lifecycleClazz.isInstance(controller)) {
+    private static <T extends LifecycleObserver> boolean checkAndCall(Class<T> lifecycleClazz, LifecycleObserver lifecycleObserver, Object[] parameters) {
+        if (lifecycleClazz.isInstance(lifecycleObserver)) {
 
             String methodName = getMethodName(lifecycleClazz);
 
@@ -214,7 +239,7 @@ public class Pan<S extends FactoryViewModel> {
             for (int i = 0; i < methods.length; i++) {
                 if (methods[i].getName().equals(methodName)) {
                     try {
-                        Object result = methods[i].invoke(controller, parameters);
+                        Object result = methods[i].invoke(lifecycleObserver, parameters);
                         if (result != null && result instanceof Boolean) {
                             shouldCallSuper = shouldCallSuper && (boolean) result;
                         }
@@ -317,7 +342,7 @@ public class Pan<S extends FactoryViewModel> {
             vm.initViewModel(activity, rootView);
             vm.getRootView().setTag(getTagKey(), vm);
 
-            bindController(vm);
+            bindControllerAndApplyPlugins(vm);
 
             return (S) vm;
         } catch (Exception e) {
@@ -357,13 +382,17 @@ public class Pan<S extends FactoryViewModel> {
             vm.getRootView().setTag(getTagKey(), vm);
 
 
-            bindController(vm);
+            bindControllerAndApplyPlugins(vm);
 
             return (S) vm;
         } catch (Exception e) {
 //            Timber.e(e, e.getMessage());
             throw new RuntimeException(e);
         }
+    }
+
+    private void bindControllerAndApplyPlugins(FactoryViewModel vm) {
+        bindController(vm);
     }
 
     private void bindController(FactoryViewModel vm) {
@@ -377,41 +406,21 @@ public class Pan<S extends FactoryViewModel> {
             }
         }
 
-        if ((contr == null || !(contr instanceof AutoRenderedController))
-                && vm instanceof AutoRenderedViewModel) {
-            throw new RuntimeException("AutoRenderedViewModel必须要有一个AutoRenderedController，例如AutoRenderedFragmentController，或者AutoRenderedActivityController");
-        }
-
         if (contr == null) {
             return;
         }
 
         if (fragmentV4 == null) {
             ACTIVITY_CONTROLLER_MAP.get(activity).add(contr);
-            if(contr instanceof LifecycleObserver.FragmentOnly && IS_DEBUG){
+            if (contr instanceof LifecycleObserver.FragmentOnly && IS_DEBUG) {
                 Log.w(TAG, "controller " + contr.getClass().getSimpleName() + " is observing to Fragment-only lifecycle, but use in an Activity context");
             }
         } else {
             FRAGMENTV4_CONTROLLER_MAP.get(fragmentV4).add(contr);
-            if(contr instanceof LifecycleObserver.ActivityOnly && IS_DEBUG){
+            if (contr instanceof LifecycleObserver.ActivityOnly && IS_DEBUG) {
                 Log.w(TAG, "controller " + contr.getClass().getSimpleName() + " is observing to Activity-only lifecycle, but use in a Fragment context");
             }
         }
-
-        //TODO 插件化
-//        if (contr instanceof EventBusActivityController) {
-//            if (!mBus.isRegistered(contr)) {
-//                mBus.register(contr);
-//            }
-//        }
-//
-//        if (contr instanceof EventBusFragmentController) {
-//            if (!mBus.isRegistered(contr)) {
-//                mBus.register(contr
-//                );
-//            }
-//        }
-
 
         contr.bindViewModel(vm);
         vm.setController(contr);
@@ -441,7 +450,7 @@ public class Pan<S extends FactoryViewModel> {
             vm.initViewModel(activity);
             vm.getRootView().setTag(getTagKey(), vm);
 
-            bindController(vm);
+            bindControllerAndApplyPlugins(vm);
 
             return (S) vm;
         } catch (Exception e) {

@@ -56,7 +56,7 @@ import android.support.v4.app.FragmentActivity;
  */
 public interface LifecycleObserver {
 
-    interface ActivityOnly{};
+    interface ActivityOnly{}
 
-    interface FragmentOnly{};
+    interface FragmentOnly{}
 }

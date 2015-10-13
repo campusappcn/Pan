@@ -2,7 +2,6 @@ package cn.campusapp.pan;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -17,6 +16,7 @@ import java.util.List;
 
 import butterknife.ButterKnife;
 import cn.campusapp.pan.annotaions.Xml;
+import cn.campusapp.pan.autorender.AutoRenderViewModel;
 
 
 /**
@@ -26,14 +26,67 @@ import cn.campusapp.pan.annotaions.Xml;
  * <p/>
  * Created by nius on 7/17/15.
  */
-public abstract class GeneralViewModel implements FactoryViewModel {
+public abstract class GeneralViewModel implements FactoryViewModel, AutoRenderViewModel {
 
+    public View mRootView = null;
     protected Activity mActivity;
-     protected GeneralController mController;
-     protected PanFragmentV4 mFragment;
+    protected GeneralController mController;
 
+    /**
+     * Whether trigger render on shown, which in these cases:
+     * <p/>
+     * 1. Activity.onResume
+     * 2. Fragment.onResume
+     * 3. Fragment.setUserVisibleHint(true)
+     *
+     * Default value is false, use {@link #autorender()} to turn it on
+     */
+    boolean mShouldRenderOnTrigger = false;
+
+    @Override
+    public boolean shouldRenderOnTrigger() {
+        return mShouldRenderOnTrigger;
+    }
+
+    /**
+     * mark the view model should be rendered on shown
+     *
+     * @see {@link cn.campusapp.pan.autorender.AutoRenderLifecyclePlugin}
+     * @see {@link AutoRenderViewModel}
+     */
+    public GeneralViewModel autorender(){
+        mShouldRenderOnTrigger = true;
+        return this;
+    }
+
+    /**
+     * mark the view model whether should be rendered on shown
+     *
+     * @see {@link cn.campusapp.pan.autorender.AutoRenderLifecyclePlugin}
+     * @see {@link AutoRenderViewModel}
+     */
+    public GeneralViewModel autorender(boolean shouldRenderOnTrigger){
+        mShouldRenderOnTrigger = shouldRenderOnTrigger;
+        return this;
+    }
+
+    protected PanFragmentV4 mFragment;
 
     public GeneralViewModel() {
+    }
+
+    public static List<Field> getAllFields(Class<?> type) {
+        return getAllFields(new ArrayList<Field>(), type);
+    }
+
+    private static List<Field> getAllFields(List<Field> fields, Class<?> type) {
+        fields.addAll(Arrays.asList(type.getDeclaredFields()));
+
+        if (type.getSuperclass() != null) {
+            fields = getAllFields(fields, type.getSuperclass());
+        }
+
+        return fields;
     }
 
     @Override
@@ -86,9 +139,7 @@ public abstract class GeneralViewModel implements FactoryViewModel {
         mFragment = fragment;
     }
 
-    public View mRootView = null;
-
-    public void init(Activity activity){
+    public void init(Activity activity) {
         init(activity.getWindow().getDecorView());
     }
 
@@ -96,7 +147,7 @@ public abstract class GeneralViewModel implements FactoryViewModel {
      * 如果view没有创建好，这边自己inflat一个
      * 如果你是Activity，请不要使用这个！
      */
-    public View initWithoutView(Context context, ViewGroup parent){
+    public View initWithoutView(Context context, ViewGroup parent) {
         init(
                 LayoutInflater.from(context).inflate(getLayout(), parent)
         );
@@ -109,7 +160,7 @@ public abstract class GeneralViewModel implements FactoryViewModel {
      *
      * @param attach 对于Fragment和Adapter，一般attach都直接传false，如果是动态生成View的场景，可以传true
      */
-    public View initWithoutView(Context context, ViewGroup parent, boolean attach){
+    public View initWithoutView(Context context, ViewGroup parent, boolean attach) {
         init(
                 LayoutInflater.from(context).inflate(getLayout(), parent, attach)
         );
@@ -122,7 +173,7 @@ public abstract class GeneralViewModel implements FactoryViewModel {
      *
      * @param root
      */
-    public void init(View root){
+    public void init(View root) {
         mRootView = root;
         injectViews(root);
         onInit();
@@ -131,22 +182,8 @@ public abstract class GeneralViewModel implements FactoryViewModel {
     /**
      * 在注入了views之后会被调用，允许子类进行一些初始化操作
      */
-    protected void onInit(){
+    protected void onInit() {
 
-    }
-
-    public static List<Field> getAllFields(Class<?> type){
-        return getAllFields(new ArrayList<Field>(), type);
-    }
-
-    private static List<Field> getAllFields(List<Field> fields, Class<?> type) {
-        fields.addAll(Arrays.asList(type.getDeclaredFields()));
-
-        if (type.getSuperclass() != null) {
-            fields = getAllFields(fields, type.getSuperclass());
-        }
-
-        return fields;
     }
 
     @LayoutRes
@@ -166,9 +203,10 @@ public abstract class GeneralViewModel implements FactoryViewModel {
 
     /**
      * 用于在整体绑定事件
+     *
      * @return
      */
-    public View getRootView(){
+    public View getRootView() {
         return mRootView;
     }
 

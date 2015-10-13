@@ -1,11 +1,8 @@
 package cn.campusapp.pan;
 
 import android.app.Activity;
-import android.os.Bundle;
-import android.view.View;
 
-import cn.campusapp.pan.autorender.AutoRenderedController;
-import cn.campusapp.pan.autorender.AutoRenderedViewModel;
+import cn.campusapp.pan.autorender.AutoRenderViewModel;
 
 
 /**
@@ -48,85 +45,12 @@ public abstract class GeneralController<T extends FactoryViewModel> implements C
     protected abstract void bindEvents();
 
 
-    //region 提前为子类实现AutoRenderedController以及 EventBusController
-
-    /**
-     * 一般在Activity的OnCreate中绑定Controller，此方法可以被调用
-     */
-    public void onStart() {
-        if ($vm instanceof AutoRenderedViewModel && this instanceof AutoRenderedController) {
-            ((AutoRenderedViewModel) $vm).loadDataQuickly();
-            $vm.render();
-        } else if ($vm instanceof AutoRenderedViewModel) {
-            throw new RuntimeException("必须要使用一个AutoRenderedViewModel啊");
-        }
-
-        //TODO 插件化
-//        if (this instanceof EventBusActivityController) {
-//            if (!mBus.isRegistered(this)) {
-//                mBus.register(this);
-//            }
-//        }
-    }
-
-    public void onStop() {
-        //TODO 插件化
-        //注册的时候是在Pan实例化时就注册了，见Pan.bindController
-//        if (this instanceof EventBusActivityController) {
-//            if (mBus.isRegistered(this)) {
-//                mBus.unregister(this);
-//            }
-//        }
-    }
-
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        //TODO 插件化
-//        if (this instanceof EventBusFragmentController) {
-//            if (!mBus.isRegistered(this)) {
-//                mBus.register(this);
-//            }
-//        }
-
-        if ($vm == null) {
-            return;
-        }
-
-        //刚刚创建完毕，自动刷新一下
-        if ($vm instanceof AutoRenderedViewModel && this instanceof AutoRenderedController) {
-            ((AutoRenderedViewModel) $vm).loadDataQuickly();
-            $vm.render();
-        } else if ($vm instanceof AutoRenderedViewModel) {
-            throw new RuntimeException("必须要使用一个AutoRenderedViewModel啊");
-        }
-    }
-
-    public void onDestroyView() {
-        //TODO 插件化
-        //注册的时候是在Pan实例化时就注册了，见Pan.bindController
-//        if (this instanceof EventBusFragmentController) {
-//            if (mBus.isRegistered(this)) {
-//                mBus.unregister(this);
-//            }
-//        }
-    }
-
-    public void onVisible(boolean isVisible) {
-        if ($vm == null || !isVisible) {
-            return;
-        }
-
-        //当可见时，刷新一下
-        if ($vm instanceof AutoRenderedViewModel && this instanceof AutoRenderedController) {
-            ((AutoRenderedViewModel) $vm).loadDataQuickly();
-            $vm.render();
-        } else if ($vm instanceof AutoRenderedViewModel) {
-            throw new RuntimeException("必须要使用一个AutoRenderedViewModel啊");
-        }
-    }
-
-    //endregion
-
     public Activity getActivity() {
         return $vm.getActivity();
     }
+
+    public FactoryViewModel getViewModel() {
+        return $vm;
+    }
+
 }

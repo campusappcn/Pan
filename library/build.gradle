@@ -21,6 +21,7 @@ android {
 dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.jakewharton:butterknife:7.0.1'
+    compile 'org.slf4j:slf4j-api:1.7.12'
 
     //user can choose to not use these support libraries.
     //not checked, for backward compatibility is of most importance currently
