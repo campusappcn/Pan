@@ -14,6 +14,7 @@ import cn.campusapp.pan.lifecycle.OnConfigurationChanged;
 import cn.campusapp.pan.lifecycle.OnDestroy;
 import cn.campusapp.pan.lifecycle.OnNewIntent;
 import cn.campusapp.pan.lifecycle.OnPause;
+import cn.campusapp.pan.lifecycle.OnPostCreate;
 import cn.campusapp.pan.lifecycle.OnRestart;
 import cn.campusapp.pan.lifecycle.OnResume;
 import cn.campusapp.pan.lifecycle.OnSaveInstanceState;
@@ -109,5 +110,11 @@ public class PanFragmentActivity extends FragmentActivity implements LifecycleOb
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         Pan.call(this, OnNewIntent.class);
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        Pan.call(this, OnPostCreate.class, savedInstanceState);
     }
 }

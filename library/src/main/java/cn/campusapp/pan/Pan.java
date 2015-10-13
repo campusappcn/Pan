@@ -16,8 +16,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import cn.campusapp.library.BuildConfig;
 import cn.campusapp.library.R;
@@ -43,11 +45,15 @@ public class Pan<S extends FactoryViewModel> {
 
     public final static Logger LOG = LoggerFactory.getLogger(Pan.class);
 
-    public final static List<LifecyclePlugin> PLUGINS = new ArrayList<LifecyclePlugin>(){
+    public final static Set<LifecyclePlugin> PLUGINS = new HashSet<LifecyclePlugin>(){
         {
             add(new AutoRenderLifecyclePlugin());
         }
     };
+
+    public static void installPlugin(LifecyclePlugin plugin){
+        PLUGINS.add(plugin);
+    }
 
     /**
      * Controller会被加入到这里，从而对相应的Activity进行监听

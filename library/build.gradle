@@ -27,4 +27,7 @@ dependencies {
     //not checked, for backward compatibility is of most importance currently
     provided 'com.android.support:appcompat-v7:23.0.1'
     provided 'com.android.support:support-v4:23.0.1'
+
+    // EventBus optional
+    provided 'de.greenrobot:eventbus:2.4.0'
 }
