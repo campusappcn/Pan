@@ -14,7 +14,7 @@ public abstract class AutoRenderViewModel extends GeneralViewModel implements Au
      * 2. Fragment.onResume
      * 3. Fragment.setUserVisibleHint(true)
      *
-     * Default value is false, use {@link #autorender()} to turn it on
+     * Default value is false, use {@link #autoRender()} to turn it on
      */
     boolean mShouldRenderOnTrigger = false;
 
@@ -29,7 +29,7 @@ public abstract class AutoRenderViewModel extends GeneralViewModel implements Au
      * @see {@link cn.campusapp.pan.autorender.AutoRenderLifecyclePlugin}
      * @see {@link AutoRender}
      */
-    public GeneralViewModel autorender(){
+    public GeneralViewModel autoRender(){
         mShouldRenderOnTrigger = true;
         return this;
     }
@@ -40,7 +40,7 @@ public abstract class AutoRenderViewModel extends GeneralViewModel implements Au
      * @see {@link cn.campusapp.pan.autorender.AutoRenderLifecyclePlugin}
      * @see {@link AutoRender}
      */
-    public GeneralViewModel autorender(boolean shouldRenderOnTrigger){
+    public GeneralViewModel autoRender(boolean shouldRenderOnTrigger){
         mShouldRenderOnTrigger = shouldRenderOnTrigger;
         return this;
     }

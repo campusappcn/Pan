@@ -147,6 +147,7 @@ public class Pan<S extends FactoryViewModel> {
         boolean shouldCallSuper = true;
         for (Controller controller : FRAGMENTV4_CONTROLLER_MAP.get(fragmentV4)) {
             shouldCallSuper = shouldCallSuper && checkAndCall(lifecycleClazz, controller, parameters);
+            callPlugins(lifecycleClazz, controller, parameters);
         }
         if (lifecycleClazz.equals(OnDestroyView.class)) {
             //由于Fragment的绑定一般都在onCreateView中，所以认为onDestroyView，该Fragment的生命周期已结束
@@ -189,7 +190,6 @@ public class Pan<S extends FactoryViewModel> {
         boolean shouldCallSuper = true;
         for (Controller controller : ACTIVITY_CONTROLLER_MAP.get(activity)) {
             shouldCallSuper = shouldCallSuper && checkAndCall(lifecycleClazz, controller, parameters);
-
             callPlugins(lifecycleClazz, controller, parameters);
         }
 
@@ -406,6 +406,8 @@ public class Pan<S extends FactoryViewModel> {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+        }else if(controllerClazz == null){ //give it a no-op controller to make everything works right
+            contr = new NoopController();
         }
 
         if (contr == null) {
