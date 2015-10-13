@@ -16,7 +16,7 @@ import java.util.List;
 
 import butterknife.ButterKnife;
 import cn.campusapp.pan.annotaions.Xml;
-import cn.campusapp.pan.autorender.AutoRenderViewModel;
+import cn.campusapp.pan.autorender.AutoRender;
 
 
 /**
@@ -26,49 +26,11 @@ import cn.campusapp.pan.autorender.AutoRenderViewModel;
  * <p/>
  * Created by nius on 7/17/15.
  */
-public abstract class GeneralViewModel implements FactoryViewModel, AutoRenderViewModel {
+public abstract class GeneralViewModel implements FactoryViewModel {
 
     public View mRootView = null;
     protected Activity mActivity;
     protected GeneralController mController;
-
-    /**
-     * Whether trigger render on shown, which in these cases:
-     * <p/>
-     * 1. Activity.onResume
-     * 2. Fragment.onResume
-     * 3. Fragment.setUserVisibleHint(true)
-     *
-     * Default value is false, use {@link #autorender()} to turn it on
-     */
-    boolean mShouldRenderOnTrigger = false;
-
-    @Override
-    public boolean shouldRenderOnTrigger() {
-        return mShouldRenderOnTrigger;
-    }
-
-    /**
-     * mark the view model should be rendered on shown
-     *
-     * @see {@link cn.campusapp.pan.autorender.AutoRenderLifecyclePlugin}
-     * @see {@link AutoRenderViewModel}
-     */
-    public GeneralViewModel autorender(){
-        mShouldRenderOnTrigger = true;
-        return this;
-    }
-
-    /**
-     * mark the view model whether should be rendered on shown
-     *
-     * @see {@link cn.campusapp.pan.autorender.AutoRenderLifecyclePlugin}
-     * @see {@link AutoRenderViewModel}
-     */
-    public GeneralViewModel autorender(boolean shouldRenderOnTrigger){
-        mShouldRenderOnTrigger = shouldRenderOnTrigger;
-        return this;
-    }
 
     protected PanFragmentV4 mFragment;
 

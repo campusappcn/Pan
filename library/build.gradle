@@ -25,7 +25,6 @@ dependencies {
 
     //user can choose to not use these support libraries.
     //not checked, for backward compatibility is of most importance currently
-    provided 'com.android.support:appcompat-v7:23.0.1'
     provided 'com.android.support:support-v4:23.0.1'
 
     // EventBus optional

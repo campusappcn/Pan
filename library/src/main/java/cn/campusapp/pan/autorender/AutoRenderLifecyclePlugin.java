@@ -27,7 +27,7 @@ public class AutoRenderLifecyclePlugin implements LifecyclePlugin {
      */
     @Override
     public void call(Controller controller, Class<? extends LifecycleObserver> lifecycleObserver, Object... parameters) {
-        if (controller == null || !(controller.getViewModel() instanceof AutoRenderViewModel)) {
+        if (controller == null || !(controller.getViewModel() instanceof AutoRender)) {
             return;
         }
 
@@ -47,7 +47,7 @@ public class AutoRenderLifecyclePlugin implements LifecyclePlugin {
     }
 
     private void autoRender(@NonNull Controller controller) {
-        AutoRenderViewModel vm = ((AutoRenderViewModel) controller.getViewModel());
+        AutoRender vm = ((AutoRender) controller.getViewModel());
 
         if(!vm.shouldRenderOnTrigger()){
             return;

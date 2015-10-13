@@ -2,8 +2,6 @@ package cn.campusapp.pan;
 
 import android.app.Activity;
 
-import cn.campusapp.pan.autorender.AutoRenderViewModel;
-
 
 /**
  * Created by nius on 7/20/15.

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
@@ -25,6 +26,7 @@ import cn.campusapp.library.BuildConfig;
 import cn.campusapp.library.R;
 import cn.campusapp.pan.autorender.AutoRenderLifecyclePlugin;
 import cn.campusapp.pan.interaction.OnBackPressed;
+import cn.campusapp.pan.lifecycle.LifecycleObserved;
 import cn.campusapp.pan.lifecycle.LifecycleObserver;
 import cn.campusapp.pan.lifecycle.LifecyclePlugin;
 import cn.campusapp.pan.lifecycle.OnDestroy;
@@ -106,32 +108,30 @@ public class Pan<S extends FactoryViewModel> {
     /**
      * 获得工厂，用于实例化
      *
-     * @param activity
+     * @param lifecycleObserved
      * @param clazz
      * @param <S>
      * @return
      */
-    public static <S extends FactoryViewModel> Pan<S> with(@NonNull PanFragmentActivity activity, @NonNull Class<S> clazz) {
-        Pan<S> f = new Pan<>();
-        f.activity = activity;
-        f.viewModelClazz = clazz;
-        return f;
-    }
+    public static <S extends FactoryViewModel> Pan<S> with(@NonNull LifecycleObserved lifecycleObserved, @NonNull Class<S> clazz) {
 
-    /**
-     * 获得工厂，用于实例化
-     *
-     * @param fragment
-     * @param clazz
-     * @param <S>
-     * @return
-     */
-    public static <S extends FactoryViewModel> Pan<S> with(@NonNull PanFragmentV4 fragment, @NonNull Class<S> clazz) {
-        Pan<S> f = new Pan<>();
-        f.activity = fragment.getActivity();
-        f.fragmentV4 = fragment;
-        f.viewModelClazz = clazz;
-        return f;
+        if(lifecycleObserved instanceof Activity){
+            Pan<S> f = new Pan<>();
+            f.activity = (Activity) lifecycleObserved;
+            f.viewModelClazz = clazz;
+            return f;
+        }
+        else if(lifecycleObserved instanceof PanFragmentV4){
+            Pan<S> f = new Pan<>();
+            PanFragmentV4 fragment = (PanFragmentV4) lifecycleObserved;
+            f.activity = fragment.getActivity();
+            f.fragmentV4 = fragment;
+            f.viewModelClazz = clazz;
+            return f;
+        }
+
+        throw new RuntimeException("Only support Activity and PanFragmentV4 currently");
+
     }
 
     // region lifecycle callbacks
@@ -348,7 +348,7 @@ public class Pan<S extends FactoryViewModel> {
             vm.initViewModel(activity, rootView);
             vm.getRootView().setTag(getTagKey(), vm);
 
-            bindControllerAndApplyPlugins(vm);
+            bindController(vm);
 
             return (S) vm;
         } catch (Exception e) {
@@ -388,17 +388,13 @@ public class Pan<S extends FactoryViewModel> {
             vm.getRootView().setTag(getTagKey(), vm);
 
 
-            bindControllerAndApplyPlugins(vm);
+            bindController(vm);
 
             return (S) vm;
         } catch (Exception e) {
 //            Timber.e(e, e.getMessage());
             throw new RuntimeException(e);
         }
-    }
-
-    private void bindControllerAndApplyPlugins(FactoryViewModel vm) {
-        bindController(vm);
     }
 
     private void bindController(FactoryViewModel vm) {
@@ -456,7 +452,7 @@ public class Pan<S extends FactoryViewModel> {
             vm.initViewModel(activity);
             vm.getRootView().setTag(getTagKey(), vm);
 
-            bindControllerAndApplyPlugins(vm);
+            bindController(vm);
 
             return (S) vm;
         } catch (Exception e) {

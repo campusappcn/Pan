@@ -1,30 +1,47 @@
 package cn.campusapp.pan.autorender;
 
-import cn.campusapp.pan.ViewModel;
+import cn.campusapp.pan.GeneralViewModel;
 
 /**
- *
- * Trigger render on shown, which means these cases:
- * <p/>
- * 1. Activity.onResume
- * 2. Fragment.onResume
- * 3. Fragment.setUserVisibleHint(true)
- *
- * Created by nius on 7/29/15.
+ * Created by nius on 10/13/15.
  */
-public interface AutoRenderViewModel extends ViewModel {
+public abstract class AutoRenderViewModel extends GeneralViewModel implements AutoRender {
 
     /**
-     * 获取最新的数据，以用来自动更新
-     * 注意，该方法必须同步返回，不可发起异步请求
+     * Whether trigger render on shown, which in these cases:
+     * <p/>
+     * 1. Activity.onResume
+     * 2. Fragment.onResume
+     * 3. Fragment.setUserVisibleHint(true)
      *
-     * render方法紧随其后被调用
+     * Default value is false, use {@link #autorender()} to turn it on
      */
-    void loadDataQuickly();
+    boolean mShouldRenderOnTrigger = false;
+
+    @Override
+    public boolean shouldRenderOnTrigger() {
+        return mShouldRenderOnTrigger;
+    }
 
     /**
+     * mark the view model should be rendered on shown
      *
-     * @return false if DO NOT render in any cases
+     * @see {@link cn.campusapp.pan.autorender.AutoRenderLifecyclePlugin}
+     * @see {@link AutoRender}
      */
-    boolean shouldRenderOnTrigger();
+    public GeneralViewModel autorender(){
+        mShouldRenderOnTrigger = true;
+        return this;
+    }
+
+    /**
+     * mark the view model whether should be rendered on shown
+     *
+     * @see {@link cn.campusapp.pan.autorender.AutoRenderLifecyclePlugin}
+     * @see {@link AutoRender}
+     */
+    public GeneralViewModel autorender(boolean shouldRenderOnTrigger){
+        mShouldRenderOnTrigger = shouldRenderOnTrigger;
+        return this;
+    }
 }
