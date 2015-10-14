@@ -18,7 +18,7 @@ public interface FactoryViewModel extends ViewModel {
      * 1. try to inflate the view if null
      * 2. use butterknife to bind views
      *
-     * @param context the activity attached to
+     * @param context the mActivity attached to
      * @param view the view viewModel attached to, if null, viewModel should inflate one from {@link cn.campusapp.pan.annotaions.Xml} tag.
      * @param container the container for the inflater
      * @param attach tell inflater whether attach the view to the container

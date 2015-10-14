@@ -77,12 +77,12 @@ public class Pan<S extends FactoryViewModel> {
      */
     private static boolean IS_DEBUG = BuildConfig.DEBUG;
 
-    Activity activity;
+    Activity mActivity;
 
-    @Nullable PanFragmentV4 fragmentV4;
-    @Nullable Class<S> viewModelClazz;
+    @Nullable PanFragmentV4 mFragmentV4;
+    @Nullable Class<S> mViewModelClazz;
     @Nullable S mViewModel;
-    @Nullable Class<? extends GeneralController> controllerClazz;
+    @Nullable Class<? extends GeneralController> mControllerClazz;
     @Nullable GeneralController mController;
     /**
      * 用于指定setTag中的tag
@@ -109,7 +109,7 @@ public class Pan<S extends FactoryViewModel> {
     public static <S extends FactoryViewModel> Pan<S> with(@NonNull LifecycleObserved lifecycleObserved, @NonNull Class<S> clazz) {
         Pan<S> f = new Pan<>();
         setUpLifecycleObserved(lifecycleObserved, f);
-        f.viewModelClazz = clazz;
+        f.mViewModelClazz = clazz;
         return f;
     }
 
@@ -122,11 +122,11 @@ public class Pan<S extends FactoryViewModel> {
 
     private static <S extends FactoryViewModel> void setUpLifecycleObserved(@NonNull LifecycleObserved lifecycleObserved, @NonNull Pan<S> f) {
         if(lifecycleObserved instanceof Activity){
-            f.activity = (Activity) lifecycleObserved;
+            f.mActivity = (Activity) lifecycleObserved;
         }else if(lifecycleObserved instanceof PanFragmentV4){
             PanFragmentV4 fragment = (PanFragmentV4) lifecycleObserved;
-            f.activity = fragment.getActivity();
-            f.fragmentV4 = fragment;
+            f.mActivity = fragment.getActivity();
+            f.mFragmentV4 = fragment;
         }else {
             throw new RuntimeException("Only support Activity and PanFragmentV4 currently");
         }
@@ -145,7 +145,7 @@ public class Pan<S extends FactoryViewModel> {
 
 
     public S getViewModel() {
-        View root = activity.getWindow().getDecorView();
+        View root = mActivity.getWindow().getDecorView();
         return getViewModel(null, root, false);
     }
 
@@ -166,8 +166,8 @@ public class Pan<S extends FactoryViewModel> {
                 vm = mViewModel; // if set mViewModel
             }
 
-            vm.setFragment(fragmentV4); //set fragment
-            vm.initViewModel(activity, view, container, attach);
+            vm.setFragment(mFragmentV4); //set fragment
+            vm.initViewModel(mActivity, view, container, attach);
 
             //set tag for view holder pattern
             view = vm.getRootView();
@@ -184,47 +184,49 @@ public class Pan<S extends FactoryViewModel> {
 
     @NonNull
     private S instantiateViewModel() throws NoSuchMethodException, InstantiationException, IllegalAccessException, java.lang.reflect.InvocationTargetException {
-        if(viewModelClazz == null){
+        if(mViewModelClazz == null){
             throw new NullPointerException("view model class or view model must exist one");
         }
-        Constructor<S> cons = viewModelClazz.getDeclaredConstructor(); //无参构造函数
+        Constructor<S> cons = mViewModelClazz.getDeclaredConstructor(); //无参构造函数
         cons.setAccessible(true);
         return cons.newInstance();
     }
 
     private void bindController(S vm) {
-        @SuppressWarnings("unchecked")
-        GeneralController contr = (GeneralController) vm.getController();
+        GeneralController controller;
 
-        contr = mController == null ? contr: mController; //if set mController
-
-        if (contr == null) {
-            if (controllerClazz != null) {
-                try {
-                    contr = controllerClazz.newInstance();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            } else { //give it a no-op controller to make everything works right
-                contr = new NoopController<>();
+        if(mController != null){
+            controller = mController;
+        }
+        else if (mControllerClazz != null){
+            try {
+                controller = mControllerClazz.newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
+        }else{
+            controller = (GeneralController) vm.getController();
         }
 
-        if (fragmentV4 == null) {
-            ACTIVITY_CONTROLLER_MAP.get(activity).add(contr);
-            if (contr instanceof LifecycleObserver.FragmentOnly && IS_DEBUG) {
-                LOG.warn("controller {} is observing to Fragment-only lifecycle, but use in an Activity context", contr.getClass().getSimpleName());
+        if(controller == null){
+            controller = new NoopController();
+        }
+
+        if (mFragmentV4 == null) {
+            ACTIVITY_CONTROLLER_MAP.get(mActivity).add(controller);
+            if (controller instanceof LifecycleObserver.FragmentOnly && IS_DEBUG) {
+                LOG.warn("controller {} is observing to Fragment-only lifecycle, but use in an Activity context", controller.getClass().getSimpleName());
             }
         } else {
-            FRAGMENTV4_CONTROLLER_MAP.get(fragmentV4).add(contr);
-            if (contr instanceof LifecycleObserver.ActivityOnly && IS_DEBUG) {
-                LOG.warn("controller {} is observing to Activity-only lifecycle, but use in a Fragment context", contr.getClass().getSimpleName());
+            FRAGMENTV4_CONTROLLER_MAP.get(mFragmentV4).add(controller);
+            if (controller instanceof LifecycleObserver.ActivityOnly && IS_DEBUG) {
+                LOG.warn("controller {} is observing to Activity-only lifecycle, but use in a Fragment context", controller.getClass().getSimpleName());
             }
         }
 
         //noinspection unchecked
-        contr.bindViewModel(vm);
-        vm.setController(contr);
+        controller.bindViewModel(vm);
+        vm.setController(controller);
     }
 
 
@@ -276,7 +278,7 @@ public class Pan<S extends FactoryViewModel> {
         return tag != null
                 &&
                 (mViewModel != null && mViewModel.equals(tag)
-                        || viewModelClazz != null && viewModelClazz.isInstance(tag));
+                        || mViewModelClazz != null && mViewModelClazz.isInstance(tag));
 
     }
 
@@ -336,7 +338,7 @@ public class Pan<S extends FactoryViewModel> {
      *
      * Call the corresponding observers of the Activity in specific lifecycle
      *
-     * @param activity  activity that has no Fragments. if it has, use PanActivityV4
+     * @param activity  mActivity that has no Fragments. if it has, use PanActivityV4
      * @param lifecycleClazz lifecycle observer class
      * @param parameters lifecycle parameters from Activity methods
      * @return should call super method, only for {@link OnRestoreInstanceState}, {@link OnSaveInstanceState}, {@link cn.campusapp.pan.interaction.OnBackPressed}
@@ -359,7 +361,7 @@ public class Pan<S extends FactoryViewModel> {
      *
      * Call the corresponding observers of the Activity in specific lifecycle
      *
-     * @param activity  activity that has Fragments of support v4. if it has, use PanActivityV4
+     * @param activity  mActivity that has Fragments of support v4. if it has, use PanActivityV4
      * @param lifecycleClazz lifecycle observer class
      * @param parameters lifecycle parameters from Activity methods
      * @return should call super method, only for {@link OnRestoreInstanceState}, {@link OnSaveInstanceState}, {@link cn.campusapp.pan.interaction.OnBackPressed}
@@ -450,8 +452,8 @@ public class Pan<S extends FactoryViewModel> {
     public Pan<S> controlledBy(Class<? extends GeneralController> controllerClazz) {
         if (controllerClazz != null) {
             try {
-                this.controllerClazz = controllerClazz;
-                this.controllerClazz.getDeclaredConstructor().setAccessible(true);
+                this.mControllerClazz = controllerClazz;
+                this.mControllerClazz.getDeclaredConstructor().setAccessible(true);
             } catch (Exception e) {
                 throw new RuntimeException(
                         e);
