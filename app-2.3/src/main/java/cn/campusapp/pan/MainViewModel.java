@@ -5,9 +5,6 @@ import android.widget.Button;
 import butterknife.Bind;
 import cn.campusapp.pan.annotaions.Xml;
 
-/**
- * Created by nius on 10/13/15.
- */
 @Xml(R.layout.view_component)
 public class MainViewModel extends GeneralViewModel {
 
@@ -17,7 +14,7 @@ public class MainViewModel extends GeneralViewModel {
     String mHelloString;
 
     @Override
-    public ViewModel render() {
+    public MainViewModel render() {
 
         vHelloTv.setText(mHelloString);
 

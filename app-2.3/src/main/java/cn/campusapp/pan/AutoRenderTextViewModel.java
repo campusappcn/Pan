@@ -6,9 +6,6 @@ import butterknife.Bind;
 import cn.campusapp.pan.annotaions.Xml;
 import cn.campusapp.pan.autorender.AutoRenderViewModel;
 
-/**
- * Created by nius on 10/13/15.
- */
 @Xml(R.layout.view_component)
 public class AutoRenderTextViewModel extends AutoRenderViewModel {
 
@@ -23,8 +20,14 @@ public class AutoRenderTextViewModel extends AutoRenderViewModel {
     }
 
     @Override
-    public ViewModel render() {
+    public AutoRenderTextViewModel render() {
         vTextView.setText(mText);
+        return this;
+    }
+
+    @Override
+    public AutoRenderTextViewModel autoRender() {
+        super.autoRender();
         return this;
     }
 }

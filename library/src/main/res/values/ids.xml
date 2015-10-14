@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="TAG_GENERAL_VIEW_MODEL" type="id" />
+    <item name="PAN_ID_0" type="id" />
+    <item name="PAN_ID_1" type="id" />
+    <item name="PAN_ID_2" type="id" />
+    <item name="PAN_ID_3" type="id" />
+    <item name="PAN_ID_4" type="id" />
+    <item name="PAN_ID_5" type="id" />
+    <item name="PAN_ID_6" type="id" />
+    <item name="PAN_ID_7" type="id" />
+    <item name="PAN_ID_8" type="id" />
+    <item name="PAN_ID_9" type="id" />
 </resources>

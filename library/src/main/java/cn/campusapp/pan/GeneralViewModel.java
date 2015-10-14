@@ -16,7 +16,6 @@ import java.util.List;
 
 import butterknife.ButterKnife;
 import cn.campusapp.pan.annotaions.Xml;
-import cn.campusapp.pan.autorender.AutoRender;
 
 
 /**
@@ -62,28 +61,14 @@ public abstract class GeneralViewModel implements FactoryViewModel {
     }
 
     @Override
-    public void initViewModel(@NonNull Activity context, @Nullable ViewGroup parent, @Nullable View view, boolean attach) {
+    public void initViewModel(@NonNull Activity context, @Nullable View view, @Nullable ViewGroup container, boolean attach) {
         mActivity = context;
 
         if (view == null) {
-            initWithoutView(context, parent, attach);
+            initWithoutView(context, container, attach);
         } else {
             init(view);
         }
-    }
-
-    @Override
-    public void initViewModel(@NonNull Activity activity) {
-        mActivity = activity;
-        init(activity);
-    }
-
-    @Override
-    public void initViewModel(@NonNull Activity context, @NonNull View container) {
-        mActivity = context;
-
-        init(container);
-
     }
 
     @Override
@@ -99,21 +84,6 @@ public abstract class GeneralViewModel implements FactoryViewModel {
     @Override
     public void setFragment(PanFragmentV4 fragment) {
         mFragment = fragment;
-    }
-
-    public void init(Activity activity) {
-        init(activity.getWindow().getDecorView());
-    }
-
-    /**
-     * 如果view没有创建好，这边自己inflat一个
-     * 如果你是Activity，请不要使用这个！
-     */
-    public View initWithoutView(Context context, ViewGroup parent) {
-        init(
-                LayoutInflater.from(context).inflate(getLayout(), parent)
-        );
-        return mRootView;
     }
 
     /**
@@ -133,7 +103,7 @@ public abstract class GeneralViewModel implements FactoryViewModel {
      * 可以在Activity、Fragment、Adapter.getView中使用。
      * 注意，在Adapter中，只需要在创建时init一次，后续重用即可
      *
-     * @param root
+     * @param root the view that binds the view model
      */
     public void init(View root) {
         mRootView = root;
@@ -166,7 +136,7 @@ public abstract class GeneralViewModel implements FactoryViewModel {
     /**
      * 用于在整体绑定事件
      *
-     * @return
+     * @return the root view of the view model binds to
      */
     public View getRootView() {
         return mRootView;
