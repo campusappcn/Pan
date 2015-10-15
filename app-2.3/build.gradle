@@ -59,7 +59,7 @@ android {
         // if true, treat all warnings as errors
         warningsAsErrors false
         // turn off checking the given issue id's
-        disable 'HardcodedText', 'TypographyFractions', 'TypographyQuotes', 'RtlHardcoded', 'RtlCompat', 'RtlEnabled', 'InvalidPackage', 'ContentDescription', 'SmallSp', 'RtlSymmetry'
+        disable "AllowBackup", "LogNotTimber", 'HardcodedText', 'TypographyFractions', 'TypographyQuotes', 'RtlHardcoded', 'RtlCompat', 'RtlEnabled', 'InvalidPackage', 'ContentDescription', 'SmallSp', 'RtlSymmetry'
         // turn on the given issue id's
         //enable 'RtlHardcoded','RtlCompat', 'RtlEnabled'
         // check *only* the given issue id's
