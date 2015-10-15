@@ -47,7 +47,7 @@ public abstract class GeneralController<T extends FactoryViewModel> implements C
         return $vm.getActivity();
     }
 
-    public FactoryViewModel getViewModel() {
+    public T getViewModel() {
         return $vm;
     }
 

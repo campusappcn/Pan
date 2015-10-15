@@ -27,11 +27,13 @@ import cn.campusapp.pan.annotaions.Xml;
  */
 public abstract class GeneralViewModel implements FactoryViewModel {
 
-    public View mRootView = null;
-    protected Activity mActivity;
-    protected GeneralController mController;
+    transient protected Activity mActivity;
 
-    protected PanFragmentV4 mFragment;
+    transient protected PanFragmentV4 mFragment;
+
+    transient public View mRootView = null;
+
+    protected GeneralController mController;
 
     public GeneralViewModel() {
     }

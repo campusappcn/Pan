@@ -16,12 +16,14 @@ import android.support.v4.app.FragmentActivity;
  * OnActivityResult
  * OnConfigurationChanged
  * OnSavedInstanceState
+
  *
  * Activity only:
  *
  * onRestart
  * onNewIntent
  * OnRestoreInstanceState
+ * OnPostCreate
  *
  * Fragment only:
  *

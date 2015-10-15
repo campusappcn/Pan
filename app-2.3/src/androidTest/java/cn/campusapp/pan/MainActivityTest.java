@@ -44,7 +44,7 @@ public class MainActivityTest {
     @Test
     public void testInnerClassController() {
         InnerMainViewModel vm = Pan.with(mMainRule.getActivity(), new InnerMainViewModel())
-                .controlledBy(new InnerMainController())  //will change the controller
+                .controlledBy(new InnerMainController())  //will replace the controller
                 .getViewModel();
 
         Object tag = new Object();
