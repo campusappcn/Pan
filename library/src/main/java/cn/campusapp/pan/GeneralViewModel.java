@@ -16,6 +16,7 @@ import java.util.List;
 
 import butterknife.ButterKnife;
 import cn.campusapp.pan.annotaions.Xml;
+import cn.campusapp.pan.lifecycle.LifecycleObserved;
 
 
 /**
@@ -81,6 +82,22 @@ public abstract class GeneralViewModel implements FactoryViewModel {
     @Override
     public PanFragmentV4 getFragmentV4() {
         return mFragment;
+    }
+
+    /**
+     * return the observing Activity/Fragment
+     * handy for nesting use of ViewModel
+     *
+     * @return Activity/Fragment currently observing
+     */
+    public LifecycleObserved getObserving(){
+        if(mFragment != null){
+            return mFragment;
+        }
+        if(mActivity != null){
+            return (LifecycleObserved) mActivity;
+        }
+        throw new RuntimeException("wtf");
     }
 
     @Override
