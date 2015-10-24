@@ -18,6 +18,10 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+
+        debug{
+            testCoverageEnabled true
+        }
     }
 }
 
@@ -29,13 +33,15 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.0.1'
     compile 'com.android.support:support-v4:23.0.1'
 
-    androidTestCompile 'com.android.support.test:runner:0.3'
+    androidTestCompile 'com.android.support.test:runner:0.4.1'
     // Set this dependency to use JUnit 4 rules
-    androidTestCompile 'com.android.support.test:rules:0.3'
+    androidTestCompile 'com.android.support.test:rules:0.4.1'
     // Set this dependency to build and run Espresso tests
-    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2'
+    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.1'
+    // Espresso-contrib for DatePicker, RecyclerView, Drawer actions, Accessibility checks, CountingIdlingResource
+    androidTestCompile 'com.android.support.test.espresso:espresso-contrib:2.2.1'
 
-    compile 'com.android.support.test.espresso:espresso-core:2.2' //for type token
+    compile 'com.android.support.test.espresso:espresso-core:2.2.1' //for type token
 
     compile 'com.arcao:slf4j-timber:2.1'
 }
