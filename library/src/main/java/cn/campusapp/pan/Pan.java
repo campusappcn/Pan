@@ -338,12 +338,12 @@ public class Pan<S extends FactoryViewModel> {
      *
      * Call the corresponding observers of the Activity in specific lifecycle
      *
-     * @param activity  mActivity that has no Fragments. if it has, use PanActivityV4
+     * @param activity  mActivity that has no Fragments. if it has, use PanActivityV4, PanAppCompatActivity
      * @param lifecycleClazz lifecycle observer class
      * @param parameters lifecycle parameters from Activity methods
      * @return should call super method, only for {@link OnRestoreInstanceState}, {@link OnSaveInstanceState}, {@link cn.campusapp.pan.interaction.OnBackPressed}
      */
-    static <T extends LifecycleObserver> boolean call(PanActivity activity, Class<T> lifecycleClazz, Object... parameters) {
+    static <T extends LifecycleObserver> boolean call(Activity activity, Class<T> lifecycleClazz, Object... parameters) {
         boolean shouldCallSuper = true;
         for (Controller controller : ACTIVITY_CONTROLLER_MAP.get(activity)) {
             shouldCallSuper = shouldCallSuper && checkAndCall(lifecycleClazz, controller, parameters);
