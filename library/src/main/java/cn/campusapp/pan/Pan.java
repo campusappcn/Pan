@@ -415,39 +415,30 @@ public class Pan<S extends FactoryViewModel> {
     private static <T extends LifecycleObserver> boolean checkAndCall(Class<T> lifecycleClazz, LifecycleObserver lifecycleObserver, Object[] parameters) {
         if (lifecycleClazz.isInstance(lifecycleObserver)) {
 
-            String methodName = getMethodName(lifecycleClazz);
-
-            // if any callback returns a boolean, && that result
+            // if any callback returns a boolean, take that value
             boolean shouldCallSuper = true;
 
-            //invoke the method with the same name
+            //invoke the method of the clazz
+            //the method name is NOT checked, for the lifecycle class should only have one method
+            //method count is checked to prevent design failure
             Method[] methods = lifecycleClazz.getMethods();
-            for (int i = 0; i < methods.length; i++) {
-                if (methods[i].getName().equals(methodName)) {
-                    try {
-                        Object result = methods[i].invoke(lifecycleObserver, parameters);
-                        if (result != null && result instanceof Boolean) {
-                            shouldCallSuper = shouldCallSuper && (boolean) result;
-                        }
-                    } catch (Exception e) {
-                        if (BuildConfig.DEBUG) {
-                            throw new RuntimeException(e);
-                        }
-                    }
+            if(methods.length > 1){
+                throw new RuntimeException("The lifecycle observer should only have one method, reconsider your design");
+            }
+            try {
+                Object result = methods[0].invoke(lifecycleObserver, parameters);
+                if (result != null && result instanceof Boolean) {
+                    shouldCallSuper = (boolean) result;
+                }
+            } catch (Exception e) {
+                if (BuildConfig.DEBUG) {
+                    throw new RuntimeException(e);
                 }
             }
             return shouldCallSuper;
         }
         return true;
     }
-
-    @NonNull
-    private static <T extends LifecycleObserver> String getMethodName(Class<T> lifecycleClazz) {
-        char[] methodNameChars = lifecycleClazz.getSimpleName().toCharArray();
-        methodNameChars[0] = Character.toLowerCase(methodNameChars[0]);
-        return new String(methodNameChars);
-    }
-
 
     public Pan<S> controlledBy(Class<? extends GeneralController> controllerClazz) {
         if (controllerClazz != null) {
