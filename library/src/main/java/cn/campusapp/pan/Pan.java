@@ -72,6 +72,11 @@ public class Pan<S extends FactoryViewModel> {
             return super.get(key);
         }
     };
+
+
+    //Lifecycle class method cache
+    final static Map<Class, Method> LIFECYCLE_METHOD_CACHE = new HashMap<>();
+
     /**
      * 是否输入日志
      */
@@ -418,15 +423,9 @@ public class Pan<S extends FactoryViewModel> {
             // if any callback returns a boolean, take that value
             boolean shouldCallSuper = true;
 
-            //invoke the method of the clazz
-            //the method name is NOT checked, for the lifecycle class should only have one method
-            //method count is checked to prevent design failure
-            Method[] methods = lifecycleClazz.getMethods();
-            if(methods.length > 1){
-                throw new RuntimeException("The lifecycle observer should only have one method, reconsider your design");
-            }
+            Method method = getLifecycleMethod(lifecycleClazz);
             try {
-                Object result = methods[0].invoke(lifecycleObserver, parameters);
+                Object result = method.invoke(lifecycleObserver, parameters);
                 if (result != null && result instanceof Boolean) {
                     shouldCallSuper = (boolean) result;
                 }
@@ -438,6 +437,27 @@ public class Pan<S extends FactoryViewModel> {
             return shouldCallSuper;
         }
         return true;
+    }
+
+    private static <T extends LifecycleObserver> Method getLifecycleMethod(Class<T> lifecycleClazz) {
+        //check method cache
+        Method method = LIFECYCLE_METHOD_CACHE.get(lifecycleClazz);
+        if(method != null){
+            return method;
+        }
+
+        //invoke the method of the clazz
+        //the method name is NOT checked, for the lifecycle class should only have one method
+        //method count is checked to prevent design failure
+        Method[] methods = lifecycleClazz.getMethods();
+        if(methods.length > 1){
+            throw new RuntimeException("The lifecycle observer should only have one method, reconsider your design");
+        }
+        method = methods[0];
+
+        LIFECYCLE_METHOD_CACHE.put(lifecycleClazz, method); //add to cache
+
+        return method;
     }
 
     public Pan<S> controlledBy(Class<? extends GeneralController> controllerClazz) {
