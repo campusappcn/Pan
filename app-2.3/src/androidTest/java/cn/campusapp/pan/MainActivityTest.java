@@ -39,6 +39,9 @@ public class MainActivityTest {
         assertEquals(vm.getRootView().getTag(R.id.PAN_ID_0), vm);
         assertEquals(vm.getRootView().getTag(R.id.PAN_ID_1), mMainRule.getActivity().mAutoRenderTextViewModel);
 
+
+        //TODO 测试ViewModel各个字段的值
+
     }
 
     @Test

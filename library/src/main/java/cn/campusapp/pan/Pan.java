@@ -166,13 +166,17 @@ public class Pan<S extends FactoryViewModel> {
             S vm;
 
             if(mViewModel == null) {
-                vm = instantiateViewModel();
+                vm = FactoryViewModel.Factory.createViewAndViewModel(mViewModelClazz, mActivity, view, container, attach);
             }else{
                 vm = mViewModel; // if set mViewModel
+                if(vm.getRootView() == null){ //inflat view if absent
+                    vm.setRootView(FactoryViewModel.Factory.inflat(mActivity, view, container, attach, vm.getClass()));
+                }
             }
 
+            vm.setActivity(mActivity);
             vm.setFragment(mFragmentV4); //set fragment
-            vm.initViewModel(mActivity, view, container, attach);
+            vm.bindViews();
 
             //set tag for view holder pattern
             view = vm.getRootView();
@@ -185,16 +189,6 @@ public class Pan<S extends FactoryViewModel> {
             Pan.LOG.error("cannot get view model", e);
             throw new RuntimeException(e);
         }
-    }
-
-    @NonNull
-    private S instantiateViewModel() throws NoSuchMethodException, InstantiationException, IllegalAccessException, java.lang.reflect.InvocationTargetException {
-        if(mViewModelClazz == null){
-            throw new NullPointerException("view model class or view model must exist one");
-        }
-        Constructor<S> cons = mViewModelClazz.getDeclaredConstructor(); //无参构造函数
-        cons.setAccessible(true);
-        return cons.newInstance();
     }
 
     private void bindController(S vm) {
