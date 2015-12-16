@@ -8,5 +8,5 @@ import cn.campusapp.pan.lifecycle.LifecycleObserver;
  */
 public interface OnBackPressed extends LifecycleObserver {
 
-    void onBackPressed();
+    boolean onBackPressed();
 }
