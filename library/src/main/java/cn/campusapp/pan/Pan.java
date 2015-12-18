@@ -11,7 +11,6 @@ import android.view.ViewGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,15 +21,16 @@ import java.util.Set;
 
 import cn.campusapp.library.BuildConfig;
 import cn.campusapp.library.R;
-import cn.campusapp.pan.autorender.AutoRenderLifecyclePlugin;
+import cn.campusapp.pan.autorender.AutoRenderControllerLifecyclePlugin;
 import cn.campusapp.pan.interaction.OnBackPressed;
 import cn.campusapp.pan.lifecycle.LifecycleObserved;
 import cn.campusapp.pan.lifecycle.LifecycleObserver;
-import cn.campusapp.pan.lifecycle.LifecyclePlugin;
+import cn.campusapp.pan.lifecycle.ControllerLifecyclePlugin;
 import cn.campusapp.pan.lifecycle.OnDestroy;
 import cn.campusapp.pan.lifecycle.OnDestroyView;
 import cn.campusapp.pan.lifecycle.OnRestoreInstanceState;
 import cn.campusapp.pan.lifecycle.OnSaveInstanceState;
+import cn.campusapp.pan.lifecycle.PanLifecyclePlugin;
 
 
 /**
@@ -45,11 +45,14 @@ public class Pan<S extends FactoryViewModel> {
 
     public final static Logger LOG = LoggerFactory.getLogger(Pan.class);
 
-    public final static Set<LifecyclePlugin> PLUGINS = new HashSet<LifecyclePlugin>() {
+    public final static Set<ControllerLifecyclePlugin> CONTROLLER_PLUGINS = new HashSet<ControllerLifecyclePlugin>() {
         {
-            add(new AutoRenderLifecyclePlugin());
+            add(new AutoRenderControllerLifecyclePlugin());
         }
     };
+
+    public final static Set<PanLifecyclePlugin> PAN_PLUGINS = new HashSet<>();
+
     /**
      * Controller会被加入到这里，从而对相应的Activity进行监听
      */
@@ -102,8 +105,12 @@ public class Pan<S extends FactoryViewModel> {
     }
 
     @SuppressWarnings("unused")
-    public static void installPlugin(LifecyclePlugin plugin) {
-        PLUGINS.add(plugin);
+    public static void installPlugin(ControllerLifecyclePlugin plugin) {
+        CONTROLLER_PLUGINS.add(plugin);
+    }
+
+    public static void installPlugin(PanLifecyclePlugin plugin){
+        PAN_PLUGINS.add(plugin);
     }
 
     @SuppressWarnings("unused")
@@ -329,6 +336,15 @@ public class Pan<S extends FactoryViewModel> {
             FRAGMENTV4_CONTROLLER_MAP.remove(fragmentV4);
         }
 
+        //call plugins on lifecycle
+        for (PanLifecyclePlugin plugin: PAN_PLUGINS){
+            try {
+                plugin.onFragmentLifecycle(fragmentV4, lifecycleClazz, parameters);
+            }catch (Throwable e){
+                LOG.error("wtf! Your plugin is shit!", e);
+            }
+        }
+
         return shouldCallSuper;
     }
 
@@ -353,6 +369,17 @@ public class Pan<S extends FactoryViewModel> {
             //已经destroy了，果取关
             ACTIVITY_CONTROLLER_MAP.remove(activity);
         }
+
+        //call plugins on lifecycle
+        for (PanLifecyclePlugin plugin: PAN_PLUGINS){
+            try {
+                plugin.onActivityLifecycle(activity, lifecycleClazz, parameters);
+            }catch (Throwable e){
+                LOG.error("wtf! Your plugin is shit!", e);
+            }
+        }
+
+
         return shouldCallSuper;
     }
 
@@ -381,11 +408,21 @@ public class Pan<S extends FactoryViewModel> {
             //已经destroy了，果取关
             ACTIVITY_CONTROLLER_MAP.remove(activity);
         }
+
+        //call plugins on lifecycle
+        for (PanLifecyclePlugin plugin: PAN_PLUGINS){
+            try {
+                plugin.onActivityLifecycle(activity, lifecycleClazz, parameters);
+            }catch (Throwable e){
+                LOG.error("wtf! Your plugin is shit!", e);
+            }
+        }
+
         return shouldCallSuper;
     }
 
     private static <T extends LifecycleObserver> void callPlugins(Class<T> lifecycleClazz, Controller controller, Object[] parameters) {
-        for (LifecyclePlugin plugin : PLUGINS) {
+        for (ControllerLifecyclePlugin plugin : CONTROLLER_PLUGINS) {
             plugin.call(controller, lifecycleClazz, parameters);
         }
     }

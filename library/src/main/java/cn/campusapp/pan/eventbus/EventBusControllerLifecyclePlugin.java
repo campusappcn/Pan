@@ -2,7 +2,7 @@ package cn.campusapp.pan.eventbus;
 
 import cn.campusapp.pan.Controller;
 import cn.campusapp.pan.lifecycle.LifecycleObserver;
-import cn.campusapp.pan.lifecycle.LifecyclePlugin;
+import cn.campusapp.pan.lifecycle.ControllerLifecyclePlugin;
 import cn.campusapp.pan.lifecycle.OnDestroy;
 import cn.campusapp.pan.lifecycle.OnDestroyView;
 import cn.campusapp.pan.lifecycle.OnPostCreate;
@@ -18,11 +18,11 @@ import de.greenrobot.event.EventBus;
  *
  * Created by nius on 10/13/15.
  */
-public class EventBusLifecyclePlugin implements LifecyclePlugin {
+public class EventBusControllerLifecyclePlugin implements ControllerLifecyclePlugin {
 
     EventBus mEventBus;
 
-    public EventBusLifecyclePlugin(EventBus eventBus) {
+    public EventBusControllerLifecyclePlugin(EventBus eventBus) {
         mEventBus = eventBus;
     }
 

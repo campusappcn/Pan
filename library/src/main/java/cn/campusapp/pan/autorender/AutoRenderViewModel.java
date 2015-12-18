@@ -35,7 +35,7 @@ public abstract class AutoRenderViewModel extends GeneralViewModel implements Au
     /**
      * mark the view model should be rendered on shown
      *
-     * @see {@link cn.campusapp.pan.autorender.AutoRenderLifecyclePlugin}
+     * @see {@link AutoRenderControllerLifecyclePlugin}
      * @see {@link AutoRender}
      */
     public GeneralViewModel autoRender(){
@@ -46,7 +46,7 @@ public abstract class AutoRenderViewModel extends GeneralViewModel implements Au
     /**
      * mark the view model whether should be rendered on shown
      *
-     * @see {@link cn.campusapp.pan.autorender.AutoRenderLifecyclePlugin}
+     * @see {@link AutoRenderControllerLifecyclePlugin}
      * @see {@link AutoRender}
      */
     @SuppressWarnings("unused")

@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 import cn.campusapp.pan.Controller;
 import cn.campusapp.pan.Pan;
 import cn.campusapp.pan.lifecycle.LifecycleObserver;
-import cn.campusapp.pan.lifecycle.LifecyclePlugin;
+import cn.campusapp.pan.lifecycle.ControllerLifecyclePlugin;
 import cn.campusapp.pan.lifecycle.OnResume;
 import cn.campusapp.pan.lifecycle.OnVisible;
 
@@ -18,7 +18,7 @@ import cn.campusapp.pan.lifecycle.OnVisible;
  *
  * Created by nius on 10/13/15.
  */
-public class AutoRenderLifecyclePlugin implements LifecyclePlugin {
+public class AutoRenderControllerLifecyclePlugin implements ControllerLifecyclePlugin {
 
     /**
      * @param controller        the controller that observes the lifecycle
