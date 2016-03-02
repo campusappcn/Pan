@@ -6,7 +6,7 @@ android {
     buildToolsVersion "23.0.1"
 
     defaultConfig {
-        minSdkVersion 10
+        minSdkVersion 14
         targetSdkVersion 23
         versionCode 1
         versionName "0.1.0"
@@ -32,14 +32,10 @@ dependencies {
 
     //user can choose to not use these support libraries.
     //not checked, for backward compatibility is of most importance currently
-    provided 'com.android.support:support-v4:23.0.1'
-    provided 'com.android.support:appcompat-v7:23.0.1'
-    provided 'com.android.support:recyclerview-v7:+'
+    provided 'com.android.support:appcompat-v7:23.2.0'
+    provided 'com.android.support:recyclerview-v7:23.2.0'
 
-    // EventBus optional
-    provided 'de.greenrobot:eventbus:2.4.0'
-
-    javadocDeps 'com.android.support:support-annotations:23.0.1'
+    javadocDeps 'com.android.support:support-annotations:23.2.0'
 }
 
 

@@ -5,7 +5,6 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
-import android.view.KeyEvent;
 
 import cn.campusapp.pan.interaction.OnBackPressed;
 import cn.campusapp.pan.lifecycle.LifecycleObserved;
@@ -16,6 +15,7 @@ import cn.campusapp.pan.lifecycle.OnNewIntent;
 import cn.campusapp.pan.lifecycle.OnPause;
 import cn.campusapp.pan.lifecycle.OnPostCreate;
 import cn.campusapp.pan.lifecycle.OnRestart;
+import cn.campusapp.pan.lifecycle.OnRestoreInstanceState;
 import cn.campusapp.pan.lifecycle.OnResume;
 import cn.campusapp.pan.lifecycle.OnSaveInstanceState;
 import cn.campusapp.pan.lifecycle.OnStart;
@@ -88,7 +88,7 @@ public class PanFragmentActivity extends FragmentActivity implements LifecycleOb
 
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-        if (Pan.call(this, OnSaveInstanceState.class, savedInstanceState)) {
+        if (Pan.call(this, OnRestoreInstanceState.class, savedInstanceState)) {
             super.onRestoreInstanceState(savedInstanceState);
         }
     }
