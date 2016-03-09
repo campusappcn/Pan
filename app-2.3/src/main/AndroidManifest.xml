@@ -3,6 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="cn.campusapp.pan" >
 
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
         android:name=".App"
         android:allowBackup="false"

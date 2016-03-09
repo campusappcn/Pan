@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 
 import cn.campusapp.pan.interaction.OnBackPressed;
 import cn.campusapp.pan.lifecycle.LifecycleObserved;
@@ -20,6 +22,7 @@ import cn.campusapp.pan.lifecycle.OnResume;
 import cn.campusapp.pan.lifecycle.OnSaveInstanceState;
 import cn.campusapp.pan.lifecycle.OnStart;
 import cn.campusapp.pan.lifecycle.OnStop;
+import cn.campusapp.pan.permissions.OnRequestPermissionsResult;
 
 
 /**
@@ -28,7 +31,7 @@ import cn.campusapp.pan.lifecycle.OnStop;
  * <p/>
  * Created by nius on 7/22/15.
  */
-public class PanActivity extends Activity implements LifecycleObserved {
+public class PanActivity extends Activity implements LifecycleObserved, ActivityCompat.OnRequestPermissionsResultCallback {
 
     public static final String TAG_PAN = "Pan";
 
@@ -118,5 +121,12 @@ public class PanActivity extends Activity implements LifecycleObserved {
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         Pan.call(this, OnPostCreate.class, savedInstanceState);
+    }
+
+    @CallSuper
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        Pan.call(this, OnRequestPermissionsResult.class, requestCode, permissions, grantResults);
     }
 }

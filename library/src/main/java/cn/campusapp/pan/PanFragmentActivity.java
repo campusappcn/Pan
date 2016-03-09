@@ -3,6 +3,7 @@ package cn.campusapp.pan;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 
@@ -14,6 +15,7 @@ import cn.campusapp.pan.lifecycle.OnDestroy;
 import cn.campusapp.pan.lifecycle.OnNewIntent;
 import cn.campusapp.pan.lifecycle.OnPause;
 import cn.campusapp.pan.lifecycle.OnPostCreate;
+import cn.campusapp.pan.permissions.OnRequestPermissionsResult;
 import cn.campusapp.pan.lifecycle.OnRestart;
 import cn.campusapp.pan.lifecycle.OnRestoreInstanceState;
 import cn.campusapp.pan.lifecycle.OnResume;
@@ -116,5 +118,12 @@ public class PanFragmentActivity extends FragmentActivity implements LifecycleOb
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         Pan.call(this, OnPostCreate.class, savedInstanceState);
+    }
+
+    @CallSuper
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        Pan.call(this, OnRequestPermissionsResult.class, requestCode, permissions, grantResults);
     }
 }

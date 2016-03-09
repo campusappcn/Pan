@@ -1,16 +1,14 @@
 package cn.campusapp.pan;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.View;
-import android.view.animation.Animation;
 
-import cn.campusapp.pan.interaction.OnBackPressed;
 import cn.campusapp.pan.lifecycle.LifecycleObserved;
 import cn.campusapp.pan.lifecycle.OnActivityCreated;
 import cn.campusapp.pan.lifecycle.OnActivityResult;
@@ -21,6 +19,7 @@ import cn.campusapp.pan.lifecycle.OnDestroyView;
 import cn.campusapp.pan.lifecycle.OnDetach;
 import cn.campusapp.pan.lifecycle.OnHiddenChanged;
 import cn.campusapp.pan.lifecycle.OnPause;
+import cn.campusapp.pan.permissions.OnRequestPermissionsResult;
 import cn.campusapp.pan.lifecycle.OnResume;
 import cn.campusapp.pan.lifecycle.OnSaveInstanceState;
 import cn.campusapp.pan.lifecycle.OnStart;
@@ -130,4 +129,10 @@ public class PanFragmentV4 extends Fragment implements LifecycleObserved {
         Pan.call(this, OnDetach.class);
     }
 
+    @CallSuper
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        Pan.call(this, OnRequestPermissionsResult.class, requestCode, permissions, grantResults);
+    }
 }
