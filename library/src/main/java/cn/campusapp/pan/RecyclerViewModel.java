@@ -72,6 +72,13 @@ public abstract class RecyclerViewModel extends RecyclerView.ViewHolder implemen
     }
 
     /**
+     * 允许外部重新初始化控件状态
+     */
+    public void reInit() {
+        onInit();
+    }
+
+    /**
      * 用于在整体绑定事件
      *
      * @return the root view of the view model binds to
