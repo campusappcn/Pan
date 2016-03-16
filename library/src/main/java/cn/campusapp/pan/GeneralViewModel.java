@@ -95,4 +95,11 @@ public abstract class GeneralViewModel implements FactoryViewModel {
     protected void onInit() {
 
     }
+
+    /**
+     * 允许外部重新初始化控件状态
+     */
+    public void reInit() {
+        onInit();
+    }
 }
