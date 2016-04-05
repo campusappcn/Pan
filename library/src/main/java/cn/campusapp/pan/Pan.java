@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -22,7 +21,6 @@ import java.util.Set;
 import cn.campusapp.library.BuildConfig;
 import cn.campusapp.library.R;
 import cn.campusapp.pan.autorender.AutoRenderControllerLifecyclePlugin;
-import cn.campusapp.pan.interaction.OnBackPressed;
 import cn.campusapp.pan.lifecycle.LifecycleObserved;
 import cn.campusapp.pan.lifecycle.LifecycleObserver;
 import cn.campusapp.pan.lifecycle.ControllerLifecyclePlugin;
@@ -66,11 +64,11 @@ public class Pan<S extends FactoryViewModel> {
         }
     };
     // region Fragment的生命周期
-    final static Map<PanFragmentV4, List<GeneralController>> FRAGMENTV4_CONTROLLER_MAP = new HashMap<PanFragmentV4, List<GeneralController>>() {
+    final static Map<PanFragment, List<GeneralController>> FRAGMENT_CONTROLLER_MAP = new HashMap<PanFragment, List<GeneralController>>() {
         @Override
         public List<GeneralController> get(Object key) {
             if (null == super.get(key)) {
-                put((PanFragmentV4) key, new ArrayList<GeneralController>());
+                put((PanFragment) key, new ArrayList<GeneralController>());
             }
             return super.get(key);
         }
@@ -87,7 +85,8 @@ public class Pan<S extends FactoryViewModel> {
 
     Activity mActivity;
 
-    @Nullable PanFragmentV4 mFragmentV4;
+    @Nullable
+    PanFragment mFragmentV4;
     @Nullable Class<S> mViewModelClazz;
     @Nullable S mViewModel;
     @Nullable Class<? extends GeneralController> mControllerClazz;
@@ -135,12 +134,12 @@ public class Pan<S extends FactoryViewModel> {
     private static <S extends FactoryViewModel> void setUpLifecycleObserved(@NonNull LifecycleObserved lifecycleObserved, @NonNull Pan<S> f) {
         if(lifecycleObserved instanceof Activity){
             f.mActivity = (Activity) lifecycleObserved;
-        }else if(lifecycleObserved instanceof PanFragmentV4){
-            PanFragmentV4 fragment = (PanFragmentV4) lifecycleObserved;
+        }else if(lifecycleObserved instanceof PanFragment){
+            PanFragment fragment = (PanFragment) lifecycleObserved;
             f.mActivity = fragment.getActivity();
             f.mFragmentV4 = fragment;
         }else {
-            throw new RuntimeException("Only support Activity and PanFragmentV4 currently");
+            throw new RuntimeException("Only support Activity and PanFragment currently");
         }
     }
 
@@ -220,12 +219,12 @@ public class Pan<S extends FactoryViewModel> {
 
         if (mFragmentV4 == null) {
             ACTIVITY_CONTROLLER_MAP.get(mActivity).add(controller);
-            if (controller instanceof LifecycleObserver.FragmentOnly && IS_DEBUG) {
+            if (controller instanceof LifecycleObserver.ForFragment && IS_DEBUG) {
                 LOG.warn("controller {} is observing to Fragment-only lifecycle, but use in an Activity context", controller.getClass().getSimpleName());
             }
         } else {
-            FRAGMENTV4_CONTROLLER_MAP.get(mFragmentV4).add(controller);
-            if (controller instanceof LifecycleObserver.ActivityOnly && IS_DEBUG) {
+            FRAGMENT_CONTROLLER_MAP.get(mFragmentV4).add(controller);
+            if (controller instanceof LifecycleObserver.ForActivity && IS_DEBUG) {
                 LOG.warn("controller {} is observing to Activity-only lifecycle, but use in a Fragment context", controller.getClass().getSimpleName());
             }
         }
@@ -320,26 +319,26 @@ public class Pan<S extends FactoryViewModel> {
      *
      * Call the corresponding observers of the Fragment in specific lifecycle
      *
-     * @param fragmentV4 the Fragment current be shown and observed
+     * @param fragment the Fragment current be shown and observed
      * @param lifecycleClazz lifecycle observer class
      * @param parameters lifecycle parameters from Fragment methods
      * @return should call super method, only for {@link OnRestoreInstanceState}, {@link OnSaveInstanceState}, {@link cn.campusapp.pan.interaction.OnBackPressed}
      */
-    static <T extends LifecycleObserver> boolean call(PanFragmentV4 fragmentV4, Class<T> lifecycleClazz, Object... parameters) {
+    static <T extends LifecycleObserver> boolean call(PanFragment fragment, Class<T> lifecycleClazz, Object... parameters) {
         boolean shouldCallSuper = true;
-        for (Controller controller : FRAGMENTV4_CONTROLLER_MAP.get(fragmentV4)) {
+        for (Controller controller : FRAGMENT_CONTROLLER_MAP.get(fragment)) {
             shouldCallSuper = shouldCallSuper && checkAndCall(lifecycleClazz, controller, parameters);
             callPlugins(lifecycleClazz, controller, parameters);
         }
         if (lifecycleClazz.equals(OnDestroyView.class)) {
             //由于Fragment的绑定一般都在onCreateView中，所以认为onDestroyView，该Fragment的生命周期已结束
-            FRAGMENTV4_CONTROLLER_MAP.remove(fragmentV4);
+            FRAGMENT_CONTROLLER_MAP.remove(fragment);
         }
 
         //call plugins on lifecycle
         for (PanLifecyclePlugin plugin: PAN_PLUGINS){
             try {
-                plugin.onFragmentLifecycle(fragmentV4, lifecycleClazz, parameters);
+                plugin.onFragmentLifecycle(fragment, lifecycleClazz, parameters);
             }catch (Throwable e){
                 LOG.error("wtf! Your plugin is shit!", e);
             }
@@ -353,7 +352,7 @@ public class Pan<S extends FactoryViewModel> {
      *
      * Call the corresponding observers of the Activity in specific lifecycle
      *
-     * @param activity  mActivity that has no Fragments. if it has, use PanActivityV4, PanAppCompatActivity
+     * @param activity  mActivity
      * @param lifecycleClazz lifecycle observer class
      * @param parameters lifecycle parameters from Activity methods
      * @return should call super method, only for {@link OnRestoreInstanceState}, {@link OnSaveInstanceState}, {@link cn.campusapp.pan.interaction.OnBackPressed}
@@ -387,7 +386,7 @@ public class Pan<S extends FactoryViewModel> {
      *
      * Call the corresponding observers of the Activity in specific lifecycle
      *
-     * @param activity  mActivity that has Fragments of support v4. if it has, use PanActivityV4
+     * @param activity  mActivity
      * @param lifecycleClazz lifecycle observer class
      * @param parameters lifecycle parameters from Activity methods
      * @return should call super method, only for {@link OnRestoreInstanceState}, {@link OnSaveInstanceState}, {@link cn.campusapp.pan.interaction.OnBackPressed}
@@ -397,11 +396,6 @@ public class Pan<S extends FactoryViewModel> {
         for (Controller controller : ACTIVITY_CONTROLLER_MAP.get(activity)) {
             shouldCallSuper = shouldCallSuper && checkAndCall(lifecycleClazz, controller, parameters);
             callPlugins(lifecycleClazz, controller, parameters);
-        }
-
-        //call onBackPressed for associated Fragments
-        if (lifecycleClazz.equals(OnBackPressed.class)) {
-            onBackPressedForFragmentV4(activity);
         }
 
         if (lifecycleClazz.equals(OnDestroy.class)) {
@@ -424,14 +418,6 @@ public class Pan<S extends FactoryViewModel> {
     private static <T extends LifecycleObserver> void callPlugins(Class<T> lifecycleClazz, Controller controller, Object[] parameters) {
         for (ControllerLifecyclePlugin plugin : CONTROLLER_PLUGINS) {
             plugin.call(controller, lifecycleClazz, parameters);
-        }
-    }
-
-    private static void onBackPressedForFragmentV4(FragmentActivity activity) {
-        for (android.support.v4.app.Fragment sf : activity.getSupportFragmentManager().getFragments()) {
-            if (sf instanceof PanFragmentV4) {
-                call((PanFragmentV4) sf, OnBackPressed.class);
-            }
         }
     }
 

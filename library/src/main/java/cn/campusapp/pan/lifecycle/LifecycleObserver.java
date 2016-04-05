@@ -1,64 +1,64 @@
 package cn.campusapp.pan.lifecycle;
 
-import android.app.Activity;
-import android.support.v4.app.FragmentActivity;
-
 /**
+ * <p>
  * Activity/Fragment life cycle observer
- *
+ * </p>
  * Shared:(both is called by android)
- *
- * OnStart
- * OnResume
- * OnPause
- * OnStop
- * OnDestroy
- * OnActivityResult
- * OnConfigurationChanged
- * OnSavedInstanceState
-
- *
+ * <ul>
+ * <li>OnStart</li>
+ * <li>OnResume</li>
+ * <li>OnPause</li>
+ * <li>OnStop</li>
+ * <li>OnDestroy</li>
+ * <li>OnActivityResult</li>
+ * <li>OnConfigurationChanged</li>
+ * <li>OnSavedInstanceState</li>
+ * </ul>
  * Activity only:
- *
- * onRestart
- * onNewIntent
- * OnRestoreInstanceState
- * OnPostCreate
- *
+ * <ul>
+ * <li>onRestart</li>
+ * <li>onNewIntent</li>
+ * <li>OnRestoreInstanceState</li>
+ * <li>OnPostCreate</li>
+ * <li>OnBackPressed</li>
+ * </ul>
  * Fragment only:
- *
- * OnAttach
- * OnDetach
- * OnViewCreated
- * OnDestroyView
- * OnVisible(setUserVisibleHint)
- * OnHiddenChanged
- * OnActivityCreated
- *
- *
- *
- * OnBackPressed is specially treated. It is called by the {@link Activity#onBackPressed()}, all the controllers whose Fragment is tied to the Activity will be called. see {@link cn.campusapp.pan.Pan#onBackPressedForFragmentV4(FragmentActivity)}
- *
- *
- *
+ * <ul>
+ * <li>OnAttach</li>
+ * <li>OnDetach</li>
+ * <li>OnViewCreated</li>
+ * <li>OnDestroyView</li>
+ * <li>OnVisible(setUserVisibleHint)</li>
+ * <li>OnHiddenChanged</li>
+ * <li>OnActivityCreated
+ * </ul>
+ * <p/>
  * Observers can stop super call:
- *
- * OnSavedInstanceState
- * OnRestoreInstanceState
- * OnBackPressed
- * OnConfigurationChanged
- * OnActivityCreated
- *
- * - Why not just FragmentController/ActivityController
+ * <p/>
+ * <ul>
+ * <li>OnSavedInstanceState</li>
+ * <li>OnRestoreInstanceState</li>
+ * <li>OnBackPressed</li>
+ * <li>OnConfigurationChanged</li>
+ * <li>OnActivityCreated</li>
+ * </ul>
+ * <p/>
+ * <p>
+ * - Why not just FragmentController/ActivityController?
+ * </p><p>
  * - Controller is reusable across Fragment/Activity, so it may observe any one of them in different context, but core logic remains the same.
- *   So this way ensures controller will not be limited to choose Activity or Fragment in definition phase.
- *   You can just make it polymorphism by using it in Activity or Fragment.
- *
+ * So this way ensures controller will not be limited to choose Activity or Fragment in definition phase.
+ * </p>
+ * You can just make it polymorphism by using it in Activity or Fragment.
+ * <p/>
  * Created by nius on 7/23/15.
  */
 public interface LifecycleObserver {
 
-    interface ActivityOnly{}
+    interface ForActivity {
+    }
 
-    interface FragmentOnly{}
+    interface ForFragment {
+    }
 }

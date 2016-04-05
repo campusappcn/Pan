@@ -26,9 +26,9 @@ public interface FactoryViewModel extends ViewModel {
 
     Activity getActivity();
 
-    PanFragmentV4 getFragmentV4();
+    PanFragment getFragment();
 
-    void setFragment(PanFragmentV4 fragment);
+    void setFragment(PanFragment fragment);
 
     void setActivity(Activity activity);
 

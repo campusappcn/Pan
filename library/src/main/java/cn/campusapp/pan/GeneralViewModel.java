@@ -18,7 +18,7 @@ public abstract class GeneralViewModel implements FactoryViewModel {
 
     transient public View mRootView = null;
     transient protected Activity mActivity;
-    transient protected PanFragmentV4 mFragment;
+    transient protected PanFragment mFragment;
     protected GeneralController mController;
 
     public GeneralViewModel() {
@@ -46,7 +46,7 @@ public abstract class GeneralViewModel implements FactoryViewModel {
     }
 
     @Override
-    public PanFragmentV4 getFragmentV4() {
+    public PanFragment getFragment() {
         return mFragment;
     }
 
@@ -67,7 +67,7 @@ public abstract class GeneralViewModel implements FactoryViewModel {
     }
 
     @Override
-    public void setFragment(PanFragmentV4 fragment) {
+    public void setFragment(PanFragment fragment) {
         mFragment = fragment;
     }
 

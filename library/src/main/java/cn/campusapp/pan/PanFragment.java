@@ -31,7 +31,7 @@ import cn.campusapp.pan.lifecycle.OnVisible;
 /**
  * Created by nius on 7/22/15.
  */
-public class PanFragmentV4 extends Fragment implements LifecycleObserved {
+public class PanFragment extends Fragment implements LifecycleObserved {
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {

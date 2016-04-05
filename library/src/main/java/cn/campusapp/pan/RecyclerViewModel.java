@@ -15,7 +15,7 @@ public abstract class RecyclerViewModel extends RecyclerView.ViewHolder implemen
 
     transient public View mRootView = null;
     transient protected Activity mActivity;
-    transient protected PanFragmentV4 mFragment;
+    transient protected PanFragment mFragment;
     protected GeneralController mController;
 
     public RecyclerViewModel(View rootView) {
@@ -39,7 +39,7 @@ public abstract class RecyclerViewModel extends RecyclerView.ViewHolder implemen
     }
 
     @Override
-    public PanFragmentV4 getFragmentV4() {
+    public PanFragment getFragment() {
         return mFragment;
     }
 
@@ -60,7 +60,7 @@ public abstract class RecyclerViewModel extends RecyclerView.ViewHolder implemen
     }
 
     @Override
-    public void setFragment(PanFragmentV4 fragment) {
+    public void setFragment(PanFragment fragment) {
         mFragment = fragment;
     }
 

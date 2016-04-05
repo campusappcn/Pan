@@ -11,7 +11,7 @@ import android.view.View;
  *
  * Created by nius on 7/29/15.
  */
-public interface OnViewCreated extends LifecycleObserver, LifecycleObserver.FragmentOnly{
+public interface OnViewCreated extends LifecycleObserver, LifecycleObserver.ForFragment {
 
     void onViewCreated(View view, Bundle savedInstanceState);
 }

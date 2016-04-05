@@ -5,7 +5,7 @@ import android.os.Bundle;
 /**
  * Created by nius on 10/12/15.
  */
-public interface OnRestoreInstanceState extends LifecycleObserver, LifecycleObserver.ActivityOnly {
+public interface OnRestoreInstanceState extends LifecycleObserver, LifecycleObserver.ForActivity {
 
     /**
      *

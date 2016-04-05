@@ -2,7 +2,6 @@ package cn.campusapp.pan;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +9,7 @@ import android.view.ViewGroup;
 /**
  * Created by nius on 10/13/15.
  */
-public class MainFragment extends PanFragmentV4{
+public class MainFragment extends PanFragment {
 
 
     @Nullable

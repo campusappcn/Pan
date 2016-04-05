@@ -48,6 +48,7 @@ task sourcesJar(type: Jar) {
 
 task javadoc(type: Javadoc) {
     failOnError  false
+    options.charSet = 'UTF-8'
     source = android.sourceSets.main.java.sourceFiles
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
     classpath += configurations.javadocDeps
