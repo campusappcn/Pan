@@ -1,9 +1,7 @@
 package cn.campusapp.pan.lifecycle;
 
 import android.app.Activity;
-import android.support.v4.app.Fragment;
-
-import cn.campusapp.pan.Controller;
+import android.app.Fragment;
 
 /**
  * Just do something on proper lifecycle for every Activity/Fragment.<br>

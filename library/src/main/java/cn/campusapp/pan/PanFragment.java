@@ -1,12 +1,12 @@
 package cn.campusapp.pan;
 
+import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.view.View;
 
 import cn.campusapp.pan.lifecycle.LifecycleObserved;
@@ -29,6 +29,7 @@ import cn.campusapp.pan.lifecycle.OnVisible;
 
 
 /**
+ * 可以被观察的Fragment
  * Created by nius on 7/22/15.
  */
 public class PanFragment extends Fragment implements LifecycleObserved {

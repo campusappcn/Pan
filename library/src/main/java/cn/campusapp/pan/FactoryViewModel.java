@@ -79,7 +79,8 @@ public interface FactoryViewModel extends ViewModel {
                         vm.mRootView = rootView;
                         //noinspection unchecked
                         return (T) vm;
-                    } else if (baseClass.equals(RecyclerViewModel.class)) {
+                    }
+                    else if (baseClass.equals(RecyclerViewModel.class)) {
                         constructor = clazz.getConstructor(View.class);
                         //noinspection unchecked
                         return (T) constructor.newInstance(rootView);
@@ -91,7 +92,7 @@ public interface FactoryViewModel extends ViewModel {
                 Pan.LOG.info("{}'s constructor has something wrong: {}", clazz.getSimpleName(), e.getMessage());
             }
 
-            throw new UnsupportedOperationException("create instance failed for {}, consider use Pan.with(object, activity) to instantiate the class yourself");
+            throw new UnsupportedOperationException("create instance failed for "+clazz.getSimpleName()+", consider use Pan.with(object, activity) to instantiate the class yourself");
         }
 
     }

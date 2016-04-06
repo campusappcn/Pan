@@ -32,11 +32,16 @@ import cn.campusapp.pan.lifecycle.PanLifecyclePlugin;
 
 
 /**
+ * <p>
  * 工厂类，用于实例化ViewModel
+ * </p><p>
  * 同时，如果该ViewModel已经通过Tag绑定到View上了，就使用之前绑定过的
- * Pan - 纪念我们的设计师
- *
- * @param <S>
+ * </p>
+ * <p>
+ * <br/>
+ * <strong>Pan - 纪念我们的设计师</strong>
+ * </p>
+ * @param <S> 用于限定工厂对象的ViewModel
  */
 @SuppressWarnings("ForLoopReplaceableByForEach")
 public class Pan<S extends FactoryViewModel> {
@@ -86,7 +91,7 @@ public class Pan<S extends FactoryViewModel> {
     Activity mActivity;
 
     @Nullable
-    PanFragment mFragmentV4;
+    PanFragment mFragment;
     @Nullable Class<S> mViewModelClazz;
     @Nullable S mViewModel;
     @Nullable Class<? extends GeneralController> mControllerClazz;
@@ -137,7 +142,7 @@ public class Pan<S extends FactoryViewModel> {
         }else if(lifecycleObserved instanceof PanFragment){
             PanFragment fragment = (PanFragment) lifecycleObserved;
             f.mActivity = fragment.getActivity();
-            f.mFragmentV4 = fragment;
+            f.mFragment = fragment;
         }else {
             throw new RuntimeException("Only support Activity and PanFragment currently");
         }
@@ -146,7 +151,7 @@ public class Pan<S extends FactoryViewModel> {
 
 
 
-    // region getViewModel (builder method)
+    // region getViewModel (factory method)
 
 
     //should mention prevention of same class view models
@@ -181,7 +186,7 @@ public class Pan<S extends FactoryViewModel> {
             }
 
             vm.setActivity(mActivity);
-            vm.setFragment(mFragmentV4); //set fragment
+            vm.setFragment(mFragment); //set fragment
             vm.bindViews();
 
             //set tag for view holder pattern
@@ -217,13 +222,13 @@ public class Pan<S extends FactoryViewModel> {
             controller = new NoopController();
         }
 
-        if (mFragmentV4 == null) {
+        if (mFragment == null) {
             ACTIVITY_CONTROLLER_MAP.get(mActivity).add(controller);
             if (controller instanceof LifecycleObserver.ForFragment && IS_DEBUG) {
                 LOG.warn("controller {} is observing to Fragment-only lifecycle, but use in an Activity context", controller.getClass().getSimpleName());
             }
         } else {
-            FRAGMENT_CONTROLLER_MAP.get(mFragmentV4).add(controller);
+            FRAGMENT_CONTROLLER_MAP.get(mFragment).add(controller);
             if (controller instanceof LifecycleObserver.ForActivity && IS_DEBUG) {
                 LOG.warn("controller {} is observing to Activity-only lifecycle, but use in a Fragment context", controller.getClass().getSimpleName());
             }
@@ -378,39 +383,6 @@ public class Pan<S extends FactoryViewModel> {
             }
         }
 
-
-        return shouldCallSuper;
-    }
-
-    /**
-     *
-     * Call the corresponding observers of the Activity in specific lifecycle
-     *
-     * @param activity  mActivity
-     * @param lifecycleClazz lifecycle observer class
-     * @param parameters lifecycle parameters from Activity methods
-     * @return should call super method, only for {@link OnRestoreInstanceState}, {@link OnSaveInstanceState}, {@link cn.campusapp.pan.interaction.OnBackPressed}
-     */
-    static <T extends LifecycleObserver> boolean call(PanFragmentActivity activity, Class<T> lifecycleClazz, Object... parameters) {
-        boolean shouldCallSuper = true;
-        for (Controller controller : ACTIVITY_CONTROLLER_MAP.get(activity)) {
-            shouldCallSuper = shouldCallSuper && checkAndCall(lifecycleClazz, controller, parameters);
-            callPlugins(lifecycleClazz, controller, parameters);
-        }
-
-        if (lifecycleClazz.equals(OnDestroy.class)) {
-            //已经destroy了，果取关
-            ACTIVITY_CONTROLLER_MAP.remove(activity);
-        }
-
-        //call plugins on lifecycle
-        for (PanLifecyclePlugin plugin: PAN_PLUGINS){
-            try {
-                plugin.onActivityLifecycle(activity, lifecycleClazz, parameters);
-            }catch (Throwable e){
-                LOG.error("wtf! Your plugin is shit!", e);
-            }
-        }
 
         return shouldCallSuper;
     }

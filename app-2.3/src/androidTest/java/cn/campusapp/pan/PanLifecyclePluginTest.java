@@ -1,10 +1,10 @@
 package cn.campusapp.pan;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Intent;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
-import android.support.v4.app.Fragment;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -12,10 +12,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import cn.campusapp.pan.lifecycle.LifecycleObserver;
-import cn.campusapp.pan.lifecycle.OnPostCreate;
 import cn.campusapp.pan.lifecycle.OnResume;
 import cn.campusapp.pan.lifecycle.OnViewCreated;
-import cn.campusapp.pan.lifecycle.OnVisible;
 import cn.campusapp.pan.lifecycle.PanLifecyclePlugin;
 
 import static junit.framework.Assert.assertEquals;

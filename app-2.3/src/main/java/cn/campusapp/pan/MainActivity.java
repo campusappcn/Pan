@@ -1,13 +1,12 @@
 package cn.campusapp.pan;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
 import java.io.Serializable;
 
-public class MainActivity extends PanFragmentActivity {
+public class MainActivity extends PanActivity {
 
     public static final String KEY_PROXY = "PROXY";
     MainViewModel mMainViewModel;

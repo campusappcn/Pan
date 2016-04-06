@@ -33,7 +33,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.2.0'
     compile 'com.android.support:support-v4:23.2.0'
     compile 'com.android.support:support-v13:23.2.0'
-    compile 'com.android.support:recyclerview-v7:23.2.0'
+//    compile 'com.android.support:recyclerview-v7:23.2.0' //seems breaking the dependencies
 
     androidTestCompile 'com.android.support.test:runner:0.4.1'
     // Set this dependency to use JUnit 4 rules
