@@ -36,9 +36,11 @@ public interface FactoryViewModel extends ViewModel {
 
     void setRootView(View rootView);
 
-    class Factory {
+    ViewFactory DEFAULT_VIEW_FACTORY = new FactoryViewModel.ViewFactory();
 
-        public static View inflat(@NonNull Activity context, @Nullable View view, @Nullable ViewGroup container, boolean attach, Class clazz) {
+    class ViewFactory {
+
+        public View inflat(@NonNull Activity context, @Nullable View view, @Nullable ViewGroup container, boolean attach, Class clazz) {
             return view != null ? view : initWithoutView(context, container, attach, clazz);
         }
 
@@ -48,12 +50,12 @@ public interface FactoryViewModel extends ViewModel {
          *
          * @param attach 对于Fragment和Adapter，一般attach都直接传false，如果是动态生成View的场景，可以传true
          */
-        public static View initWithoutView(Context context, ViewGroup parent, boolean attach, Class clazz) {
+        public View initWithoutView(Context context, ViewGroup parent, boolean attach, Class clazz) {
             return LayoutInflater.from(context).inflate(getLayout(clazz), parent, attach);
         }
 
         @LayoutRes
-        public static int getLayout(Class clazz) {
+        public int getLayout(Class clazz) {
 //        this.getClass().getAnnotation(Xml.class).value();
             Xml annotation = (Xml) clazz.getAnnotation(Xml.class);
             while (annotation == null) {
@@ -66,7 +68,7 @@ public interface FactoryViewModel extends ViewModel {
             return annotation.value();
         }
 
-        public static <T extends FactoryViewModel> T createViewAndViewModel(Class<T> clazz, Activity activity, View rootView, @Nullable ViewGroup container, boolean attach) {
+        public <T extends FactoryViewModel> T createViewAndViewModel(Class<T> clazz, Activity activity, View rootView, @Nullable ViewGroup container, boolean attach) {
             Constructor constructor;
             rootView = inflat(activity, rootView, container, attach, clazz);
 

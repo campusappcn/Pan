@@ -96,6 +96,8 @@ public class Pan<S extends FactoryViewModel> {
     @Nullable S mViewModel;
     @Nullable Class<? extends GeneralController> mControllerClazz;
     @Nullable GeneralController mController;
+
+    @NonNull FactoryViewModel.ViewFactory mViewFactory = FactoryViewModel.DEFAULT_VIEW_FACTORY;
     /**
      * 用于指定setTag中的tag
      * 如果没有设置，则使用R.id.TAG_GENERAL_VIEW_MODEL
@@ -151,7 +153,7 @@ public class Pan<S extends FactoryViewModel> {
 
 
 
-    // region getViewModel (factory method)
+    // region getViewModel (viewFactory method)
 
 
     //should mention prevention of same class view models
@@ -177,11 +179,11 @@ public class Pan<S extends FactoryViewModel> {
             S vm;
 
             if(mViewModel == null) {
-                vm = FactoryViewModel.Factory.createViewAndViewModel(mViewModelClazz, mActivity, view, container, attach);
+                vm = mViewFactory.createViewAndViewModel(mViewModelClazz, mActivity, view, container, attach);
             }else{
                 vm = mViewModel; // if set mViewModel
                 if(vm.getRootView() == null){ //inflat view if absent
-                    vm.setRootView(FactoryViewModel.Factory.inflat(mActivity, view, container, attach, vm.getClass()));
+                    vm.setRootView(mViewFactory.inflat(mActivity, view, container, attach, vm.getClass()));
                 }
             }
 
@@ -465,6 +467,11 @@ public class Pan<S extends FactoryViewModel> {
     @SuppressWarnings("unused")
     public Pan<S> controlledBy(GeneralController controller){
         mController = controller;
+        return this;
+    }
+
+    public Pan<S> viewFactory(@NonNull FactoryViewModel.ViewFactory viewFactory){
+        mViewFactory = viewFactory;
         return this;
     }
 
