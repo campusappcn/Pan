@@ -5,6 +5,7 @@
 
     <data>
         <variable name="user" type="cn.campusapp.sample_databinding.User"/>
+        <variable name="handlers" type="cn.campusapp.sample_databinding.MainActivity.MainDataBindingController" />
     </data>
 
     <RelativeLayout
@@ -19,9 +20,11 @@
         tools:showIn="@layout/activity_main">
 
 
-        <TextView
+        <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{user.name}"/>
+            android:text="@{user.name}"
+            android:onClick="@{handlers.onclick}"
+            />
     </RelativeLayout>
 </layout>

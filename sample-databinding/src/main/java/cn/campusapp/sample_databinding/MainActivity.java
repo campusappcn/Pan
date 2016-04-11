@@ -3,6 +3,7 @@ package cn.campusapp.sample_databinding;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import cn.campusapp.pan.Pan;
 import cn.campusapp.pan.PanActivity;
@@ -17,6 +18,7 @@ public class MainActivity extends PanActivity {
 
         Pan.with(this, MainDataBindingViewModel.class)
                 .viewFactory(DataBindingViewFactory.INSTANCE)//如果自行实例化View就需要这个
+                .controlledBy(MainDataBindingController.class)
                 .getViewModel()
                 .setData(new User("hello data binding!"))
                 .render();
@@ -32,6 +34,23 @@ public class MainActivity extends PanActivity {
         @Override
         public MainDataBindingViewModel render() {
             return this;
+        }
+    }
+
+    public static class MainDataBindingController extends DataBindingController<MainDataBindingViewModel>{
+
+        @Override
+        protected void bindHandlers() {
+            $vm.getViewDataBinding().setHandlers(this);
+        }
+
+        public void onclick(View v){
+            Toast.makeText(getActivity(), "hello data binding click!", Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        protected void bindEvents() {
+
         }
     }
 }

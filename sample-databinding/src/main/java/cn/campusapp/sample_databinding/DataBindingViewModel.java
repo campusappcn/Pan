@@ -23,6 +23,10 @@ public abstract class DataBindingViewModel<D extends BaseObservable, B extends V
         return this;
     }
 
+    public B getViewDataBinding(){
+        return mViewDataBinding;
+    }
+
     public D getData(){
         return mData;
     }
