@@ -117,7 +117,7 @@ public class MainController extends GeneralController<MainViewModel>
 	}
 
 	dependencies {
-        compile 'com.github.campusappcn:Pan:0.3.1'
+        compile 'com.github.campusappcn:Pan:0.4.0'
 	}
 ```
 
