@@ -1,1 +1,1 @@
-include ':app-2.3', ':library'
+include ':app-2.3', ':library', ':sample-databinding'

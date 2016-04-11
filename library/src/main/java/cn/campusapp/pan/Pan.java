@@ -163,7 +163,7 @@ public class Pan<S extends FactoryViewModel> {
 
 
     public S getViewModel() {
-        View root = mActivity.getWindow().getDecorView();
+        View root = ((ViewGroup)mActivity.findViewById(android.R.id.content)).getChildAt(0);
         return getViewModel(null, root, false);
     }
 
