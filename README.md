@@ -124,6 +124,9 @@ public class MainController extends GeneralController<MainViewModel>
 <br/>
 <br/>
 
+致谢：
+   @PrototypeZ，为Pan的前身提供了很大的贡献。
+
 License
 -------
 
