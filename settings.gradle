@@ -1,1 +1,1 @@
-include ':app-2.3', ':library', ':sample-databinding', ':sample-github-users'
+include ':app-test', ':library', ':sample-databinding', ':sample-github-users'
