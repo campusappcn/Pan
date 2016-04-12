@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".modules.userList.MainActivity">
+    android:orientation="vertical"
+    tools:context="cn.campusapp.sample_github_users.modules.userDetail.DetailActivity">
+
+    <include android:layout_width="match_parent" android:layout_height="200dp"
+             layout="@layout/view_user" />
 
     <ListView
-        android:id="@+id/user_list"
+        android:id="@+id/event_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:divider="@null"
         android:dividerHeight="0dp"
         />
-</RelativeLayout>
+
+</LinearLayout>

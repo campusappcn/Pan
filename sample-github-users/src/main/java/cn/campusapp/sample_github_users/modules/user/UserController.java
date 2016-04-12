@@ -1,9 +1,9 @@
 package cn.campusapp.sample_github_users.modules.user;
 
+import android.util.Log;
 import android.widget.Toast;
 
 import cn.campusapp.pan.GeneralController;
-import cn.campusapp.pan.ViewModel;
 import cn.campusapp.sample_github_users.entity.GithubUser;
 import cn.campusapp.sample_github_users.rest.GitHubService;
 import retrofit2.Call;
@@ -41,7 +41,8 @@ public class UserController extends GeneralController<UserViewModel> {
                     bindedUser.setName(response.body().getName());
                     $vm.render();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Toast.makeText(getActivity(), "Github limit 60 requests per hour!", Toast.LENGTH_LONG).show();
+                    Log.e("wtf", "wtf", e);
                 }
             }
 

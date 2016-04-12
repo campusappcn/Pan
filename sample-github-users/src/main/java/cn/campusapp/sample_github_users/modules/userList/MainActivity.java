@@ -1,9 +1,10 @@
-package cn.campusapp.sample_github_users;
+package cn.campusapp.sample_github_users.modules.userList;
 
 import android.os.Bundle;
 
 import cn.campusapp.pan.Pan;
 import cn.campusapp.pan.PanActivity;
+import cn.campusapp.sample_github_users.R;
 import cn.campusapp.sample_github_users.modules.userList.UserListController;
 import cn.campusapp.sample_github_users.modules.userList.UserListViewModel;
 
