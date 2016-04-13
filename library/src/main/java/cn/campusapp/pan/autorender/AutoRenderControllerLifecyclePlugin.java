@@ -11,11 +11,11 @@ import cn.campusapp.pan.lifecycle.OnVisible;
 
 /**
  * Trigger render on shown, which means these cases:
- * <p/>
- * 1. Activity.onResume
- * 2. Fragment.onResume
- * 3. Fragment.setUserVisibleHint(true)
- *
+ * <ol>
+ * <li>Activity.onResume</li>
+ * <li>Fragment.onResume</li>
+ * <li>Fragment.setUserVisibleHint(true)</li>
+ * </ol>
  * Created by nius on 10/13/15.
  */
 public class AutoRenderControllerLifecyclePlugin implements ControllerLifecyclePlugin {

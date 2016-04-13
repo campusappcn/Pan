@@ -33,8 +33,6 @@ import cn.campusapp.pan.permissions.OnRequestPermissionsResult;
  */
 public class PanActivity extends Activity implements LifecycleObserved, ActivityCompat.OnRequestPermissionsResultCallback {
 
-    public static final String TAG_PAN = "Pan";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

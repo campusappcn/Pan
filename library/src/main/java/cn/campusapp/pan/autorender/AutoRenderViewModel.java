@@ -5,13 +5,12 @@ import cn.campusapp.pan.GeneralViewModel;
 /**
  *
  * Automatically trigger render on particular lifecycle status:
- *
- * 1. Activity.onResume
- * 2. Fragment.onResume
- * 3. Fragment.setUserVisibleHint(true)
- *
+ * <ol>
+ * <li>Activity.onResume/Fragment.onResume</li>
+ * <li>Fragment.setUserVisibleHint(true)</li>
+ * </ol>
  * Configure it using {@link AutoRenderViewModel#autoRender()} and {@link AutoRenderViewModel#autoRender(boolean)}
- *
+ * <p/>
  * Created by nius on 10/13/15.
  */
 public abstract class AutoRenderViewModel extends GeneralViewModel implements AutoRender {

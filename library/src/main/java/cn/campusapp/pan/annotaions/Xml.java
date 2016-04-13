@@ -9,9 +9,9 @@ import java.lang.annotation.Target;
 
 /**
  * 用于表示某个view对应的xml
+ * <p/>
  * Created by Jason on 2015/5/30.
  */
-
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Xml {

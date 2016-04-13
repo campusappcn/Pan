@@ -1,6 +1,7 @@
 package cn.campusapp.pan;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.view.View;
 
 import butterknife.ButterKnife;
@@ -18,7 +19,7 @@ public abstract class GeneralViewModel implements FactoryViewModel {
 
     transient public View mRootView = null;
     transient protected Activity mActivity;
-    transient protected PanFragment mFragment;
+    transient protected Fragment mFragment;
     protected GeneralController mController;
 
     public GeneralViewModel() {
@@ -46,8 +47,13 @@ public abstract class GeneralViewModel implements FactoryViewModel {
     }
 
     @Override
-    public PanFragment getFragment() {
+    public Fragment getFragment() {
         return mFragment;
+    }
+
+    @Override
+    public void setFragment(Fragment fragment) {
+        mFragment = fragment;
     }
 
     /**
@@ -58,17 +64,12 @@ public abstract class GeneralViewModel implements FactoryViewModel {
      */
     public LifecycleObserved getObserving() {
         if (mFragment != null) {
-            return mFragment;
+            return (LifecycleObserved) mFragment;
         }
         if (mActivity != null) {
             return (LifecycleObserved) mActivity;
         }
         throw new RuntimeException("wtf");
-    }
-
-    @Override
-    public void setFragment(PanFragment fragment) {
-        mFragment = fragment;
     }
 
     /**

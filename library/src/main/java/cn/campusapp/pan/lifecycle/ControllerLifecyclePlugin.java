@@ -10,8 +10,6 @@ import cn.campusapp.pan.Controller;
  * <p>
  *     This means if your controller is binded in OnCreate phase, then there will be no call on this plugin because controller is not even functional at that time.
  * </p>
- *
- * <p/>
  * Created by nius on 10/13/15.
  */
 public interface ControllerLifecyclePlugin {

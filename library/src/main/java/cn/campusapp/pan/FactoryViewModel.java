@@ -1,6 +1,7 @@
 package cn.campusapp.pan;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
@@ -15,10 +16,13 @@ import cn.campusapp.pan.annotaions.Xml;
 
 /**
  * 与ViewHolder紧密结合的ViewModel，适用于ViewModelFactory
+ * <p/>
  * Created by nius on 7/17/15.
  */
 public interface FactoryViewModel extends ViewModel {
 
+
+    ViewFactory DEFAULT_VIEW_FACTORY = new FactoryViewModel.ViewFactory();
 
     Controller getController();
 
@@ -26,17 +30,15 @@ public interface FactoryViewModel extends ViewModel {
 
     Activity getActivity();
 
-    PanFragment getFragment();
-
-    void setFragment(PanFragment fragment);
-
     void setActivity(Activity activity);
+
+    Fragment getFragment();
+
+    void setFragment(Fragment fragment);
 
     void bindViews();
 
     void setRootView(View rootView);
-
-    ViewFactory DEFAULT_VIEW_FACTORY = new FactoryViewModel.ViewFactory();
 
     class ViewFactory {
 
@@ -81,8 +83,7 @@ public interface FactoryViewModel extends ViewModel {
                         vm.mRootView = rootView;
                         //noinspection unchecked
                         return (T) vm;
-                    }
-                    else if (baseClass.equals(RecyclerViewModel.class)) {
+                    } else if (baseClass.equals(RecyclerViewModel.class)) {
                         constructor = clazz.getConstructor(View.class);
                         //noinspection unchecked
                         return (T) constructor.newInstance(rootView);
@@ -94,7 +95,7 @@ public interface FactoryViewModel extends ViewModel {
                 Pan.LOG.info("{}'s constructor has something wrong: {}", clazz.getSimpleName(), e.getMessage());
             }
 
-            throw new UnsupportedOperationException("create instance failed for "+clazz.getSimpleName()+", consider use Pan.with(object, activity) to instantiate the class yourself");
+            throw new UnsupportedOperationException("create instance failed for " + clazz.getSimpleName() + ", consider use Pan.with(object, activity) to instantiate the class yourself");
         }
 
     }

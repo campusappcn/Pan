@@ -1,6 +1,7 @@
 package cn.campusapp.pan;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
@@ -15,7 +16,7 @@ public abstract class RecyclerViewModel extends RecyclerView.ViewHolder implemen
 
     transient public View mRootView = null;
     transient protected Activity mActivity;
-    transient protected PanFragment mFragment;
+    transient protected Fragment mFragment;
     protected GeneralController mController;
 
     public RecyclerViewModel(View rootView) {
@@ -39,7 +40,7 @@ public abstract class RecyclerViewModel extends RecyclerView.ViewHolder implemen
     }
 
     @Override
-    public PanFragment getFragment() {
+    public Fragment getFragment() {
         return mFragment;
     }
 
@@ -51,7 +52,7 @@ public abstract class RecyclerViewModel extends RecyclerView.ViewHolder implemen
      */
     public LifecycleObserved getObserving() {
         if (mFragment != null) {
-            return mFragment;
+            return (LifecycleObserved) mFragment;
         }
         if (mActivity != null) {
             return (LifecycleObserved) mActivity;
@@ -60,7 +61,7 @@ public abstract class RecyclerViewModel extends RecyclerView.ViewHolder implemen
     }
 
     @Override
-    public void setFragment(PanFragment fragment) {
+    public void setFragment(Fragment fragment) {
         mFragment = fragment;
     }
 

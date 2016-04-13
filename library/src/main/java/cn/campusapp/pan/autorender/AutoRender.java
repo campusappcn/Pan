@@ -5,11 +5,11 @@ import cn.campusapp.pan.ViewModel;
 /**
  *
  * Trigger render on shown, which means these cases:
- * <p/>
- * 1. Activity.onResume
- * 2. Fragment.onResume
- * 3. Fragment.setUserVisibleHint(true)
- *
+ * <ol>
+ * <li>Activity.onResume</li>
+ * <li>Fragment.onResume</li>
+ * <li>Fragment.setUserVisibleHint(true)</li>
+ * </ol>
  * Created by nius on 7/29/15.
  */
 public interface AutoRender extends ViewModel {

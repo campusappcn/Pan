@@ -30,8 +30,6 @@ import cn.campusapp.pan.lifecycle.OnStop;
  */
 public class PanAppCompatActivity extends AppCompatActivity implements LifecycleObserved {
 
-    public static final String TAG_PAN = "Pan";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

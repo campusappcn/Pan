@@ -1,6 +1,7 @@
 package cn.campusapp.pan;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -54,6 +55,9 @@ public class Pan<S extends FactoryViewModel> {
         }
     };
 
+    /**
+     * 插件集合
+     */
     public final static Set<PanLifecyclePlugin> PAN_PLUGINS = new HashSet<>();
 
     /**
@@ -68,12 +72,12 @@ public class Pan<S extends FactoryViewModel> {
             return super.get(key);
         }
     };
-    // region Fragment的生命周期
-    final static Map<PanFragment, List<GeneralController>> FRAGMENT_CONTROLLER_MAP = new HashMap<PanFragment, List<GeneralController>>() {
+    // Fragment的控制器
+    final static Map<Fragment, List<GeneralController>> FRAGMENT_CONTROLLER_MAP = new HashMap<Fragment, List<GeneralController>>() {
         @Override
         public List<GeneralController> get(Object key) {
             if (null == super.get(key)) {
-                put((PanFragment) key, new ArrayList<GeneralController>());
+                put((Fragment) key, new ArrayList<GeneralController>());
             }
             return super.get(key);
         }
@@ -90,19 +94,22 @@ public class Pan<S extends FactoryViewModel> {
 
     Activity mActivity;
 
-    @Nullable
-    PanFragment mFragment;
+    @Nullable Fragment mFragment;
+
     @Nullable Class<S> mViewModelClazz;
     @Nullable S mViewModel;
+
     @Nullable Class<? extends GeneralController> mControllerClazz;
     @Nullable GeneralController mController;
 
     @NonNull FactoryViewModel.ViewFactory mViewFactory = FactoryViewModel.DEFAULT_VIEW_FACTORY;
+
     /**
      * 用于指定setTag中的tag
      * 如果没有设置，则使用R.id.TAG_GENERAL_VIEW_MODEL
      */
     int tagKey = -1;
+
     /**
      * 实例化请使用GeneralViewModel.with()
      * 或其他ViewModel的对应方法
@@ -110,20 +117,24 @@ public class Pan<S extends FactoryViewModel> {
     Pan() {
     }
 
-    @SuppressWarnings("unused")
-    public static void installPlugin(ControllerLifecyclePlugin plugin) {
-        CONTROLLER_PLUGINS.add(plugin);
-    }
-
-    public static void installPlugin(PanLifecyclePlugin plugin){
-        PAN_PLUGINS.add(plugin);
-    }
-
+    /**
+     * use this to print logs
+     */
     @SuppressWarnings("unused")
     public static void setDebug(boolean isDebug) {
         IS_DEBUG = isDebug;
     }
 
+    //region factory entry "with"
+
+    /**
+     * 工厂方法入口。适用于ViewModel带有公有构造函数的场景。
+     *
+     * @param lifecycleObserved PanActivity/PanFragment, 或者其他实现了{@link LifecycleObserved}接口的基类，具体实现请参考{@link LifecycleObserved}
+     * @param clazz ViewModel的类型，通常是{@link GeneralViewModel}或者{@link RecyclerViewModel}的子类
+     * @param <S> ViewModel类型泛型
+     * @return Pan工厂对象
+     */
     public static <S extends FactoryViewModel> Pan<S> with(@NonNull LifecycleObserved lifecycleObserved, @NonNull Class<S> clazz) {
         Pan<S> f = new Pan<>();
         setUpLifecycleObserved(lifecycleObserved, f);
@@ -131,6 +142,14 @@ public class Pan<S extends FactoryViewModel> {
         return f;
     }
 
+    /**
+     * 工厂方法入口。适用于ViewModel没有公有构造函数，直接传入对象（例如非静态内部类）。
+     *
+     * @param lifecycleObserved PanActivity/PanFragment, 或者其他实现了{@link LifecycleObserved}接口的基类，具体实现请参考{@link LifecycleObserved}
+     * @param viewModel ViewModel对象
+     * @param <S> ViewModel类型泛型
+     * @return Pan工厂对象
+     */
     public static <S extends FactoryViewModel> Pan<S> with(@NonNull LifecycleObserved lifecycleObserved, @NonNull S viewModel){
         Pan<S> f = new Pan<>();
         setUpLifecycleObserved(lifecycleObserved, f);
@@ -150,8 +169,7 @@ public class Pan<S extends FactoryViewModel> {
         }
     }
 
-
-
+    //endregion
 
     // region getViewModel (viewFactory method)
 
@@ -244,8 +262,11 @@ public class Pan<S extends FactoryViewModel> {
 
     // endregion
 
-    // region tag
+    // region tag for ViewHolder pattern
 
+    /**
+     * 用于处理ViewHolder模式，将ViewModel绑定到View上。最多支持一个View绑定10个ViewModel
+     */
     private final static int[] TAGS_PRE_DEFINED = new int[]{
             R.id.PAN_ID_0,
             R.id.PAN_ID_1,
@@ -331,7 +352,7 @@ public class Pan<S extends FactoryViewModel> {
      * @param parameters lifecycle parameters from Fragment methods
      * @return should call super method, only for {@link OnRestoreInstanceState}, {@link OnSaveInstanceState}, {@link cn.campusapp.pan.interaction.OnBackPressed}
      */
-    static <T extends LifecycleObserver> boolean call(PanFragment fragment, Class<T> lifecycleClazz, Object... parameters) {
+    static <T extends LifecycleObserver> boolean call(Fragment fragment, Class<T> lifecycleClazz, Object... parameters) {
         boolean shouldCallSuper = true;
         for (Controller controller : FRAGMENT_CONTROLLER_MAP.get(fragment)) {
             shouldCallSuper = shouldCallSuper && checkAndCall(lifecycleClazz, controller, parameters);
@@ -389,6 +410,20 @@ public class Pan<S extends FactoryViewModel> {
         return shouldCallSuper;
     }
 
+    //endregion
+
+    //region lifecycle plugins
+
+    @SuppressWarnings("unused")
+    public static void installPlugin(ControllerLifecyclePlugin plugin) {
+        CONTROLLER_PLUGINS.add(plugin);
+    }
+
+    public static void installPlugin(PanLifecyclePlugin plugin){
+        PAN_PLUGINS.add(plugin);
+    }
+
+
     private static <T extends LifecycleObserver> void callPlugins(Class<T> lifecycleClazz, Controller controller, Object[] parameters) {
         for (ControllerLifecyclePlugin plugin : CONTROLLER_PLUGINS) {
             plugin.call(controller, lifecycleClazz, parameters);
@@ -430,6 +465,9 @@ public class Pan<S extends FactoryViewModel> {
         return true;
     }
 
+    /**
+     * 缓存反射的方法
+     */
     private static <T extends LifecycleObserver> Method getLifecycleMethod(Class<T> lifecycleClazz) {
         //check method cache
         Method method = LIFECYCLE_METHOD_CACHE.get(lifecycleClazz);
@@ -450,7 +488,15 @@ public class Pan<S extends FactoryViewModel> {
 
         return method;
     }
+    //endregion
 
+    //region controller setter
+
+    /**
+     * 设置控制器，适用于控制器有公有无参构造函数的情况
+     * @param controllerClazz 控制器类型，一般是{@link GeneralController}的子类
+     * @return Pan工厂
+     */
     public Pan<S> controlledBy(Class<? extends GeneralController> controllerClazz) {
         if (controllerClazz != null) {
             try {
@@ -464,17 +510,28 @@ public class Pan<S extends FactoryViewModel> {
         return this;
     }
 
+    /**
+     * 设置控制器，适用于控制器没有公有无参构造函数的情况
+     * @param controller 控制器对象
+     * @return Pan工厂
+     */
     @SuppressWarnings("unused")
     public Pan<S> controlledBy(GeneralController controller){
         mController = controller;
         return this;
     }
 
+    //endregion
+
+    /**
+     * 设置ViewFactory，用于inflate ViewModel对应的Xml。
+     * 可以参考sample-databinding中的使用
+     * @param viewFactory ViewFactory对象
+     * @return Pan工厂
+     */
     public Pan<S> viewFactory(@NonNull FactoryViewModel.ViewFactory viewFactory){
         mViewFactory = viewFactory;
         return this;
     }
-
-    // endregion
 
 }

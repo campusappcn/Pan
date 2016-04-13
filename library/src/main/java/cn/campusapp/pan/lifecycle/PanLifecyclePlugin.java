@@ -17,8 +17,8 @@ public interface PanLifecyclePlugin {
      * Called on every activity lifecycle for every activity controlled by Pan.
      * <br>
      *
-     * @param target target Activity
-     * @param lifecycle e.g. {@link OnResume}
+     * @param target     target Activity
+     * @param lifecycle  e.g. {@link OnResume}
      * @param parameters the params passed by the system for that lifecycle
      */
     void onActivityLifecycle(Activity target, Class<? extends LifecycleObserver> lifecycle, Object... parameters);
@@ -26,8 +26,8 @@ public interface PanLifecyclePlugin {
     /**
      * Called on every fragment lifecycle for every fragment controller by Pan.
      *
-     * @param target target Fragment
-     * @param lifecycle lifecycle e.g {@link OnVisible}
+     * @param target     target Fragment
+     * @param lifecycle  lifecycle e.g {@link OnVisible}
      * @param parameters the params passed by the system for that lifecycle
      */
     void onFragmentLifecycle(Fragment target, Class<? extends LifecycleObserver> lifecycle, Object... parameters);

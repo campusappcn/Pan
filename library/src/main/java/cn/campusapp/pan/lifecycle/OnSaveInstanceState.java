@@ -2,9 +2,6 @@ package cn.campusapp.pan.lifecycle;
 
 import android.os.Bundle;
 
-/**
- * Created by nius on 10/12/15.
- */
 public interface OnSaveInstanceState extends LifecycleObserver {
     /**
      *
