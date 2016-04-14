@@ -1,4 +1,7 @@
 # Pan
+
+<img alt='Pan logo android MVW框架' src='https://img.alicdn.com/imgextra/i1/56380417/TB20PmhnXXXXXXPXpXXXXXXXXXX_!!56380417.png' width="180px">
+
 A light weight MV* framework to build android reusable UI components.
 
 [中文文档](http://blog.campusapp.cn/Pan-Documentation/)  [Javadoc](http://blog.campusapp.cn/Pan-Documentation/javadoc)
