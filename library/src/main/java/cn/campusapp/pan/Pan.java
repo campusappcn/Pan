@@ -22,9 +22,9 @@ import java.util.Set;
 import cn.campusapp.library.BuildConfig;
 import cn.campusapp.library.R;
 import cn.campusapp.pan.autorender.AutoRenderControllerLifecyclePlugin;
+import cn.campusapp.pan.lifecycle.ControllerLifecyclePlugin;
 import cn.campusapp.pan.lifecycle.LifecycleObserved;
 import cn.campusapp.pan.lifecycle.LifecycleObserver;
-import cn.campusapp.pan.lifecycle.ControllerLifecyclePlugin;
 import cn.campusapp.pan.lifecycle.OnDestroy;
 import cn.campusapp.pan.lifecycle.OnDestroyView;
 import cn.campusapp.pan.lifecycle.OnRestoreInstanceState;
@@ -358,8 +358,10 @@ public class Pan<S extends FactoryViewModel> {
             shouldCallSuper = shouldCallSuper && checkAndCall(lifecycleClazz, controller, parameters);
             callPlugins(lifecycleClazz, controller, parameters);
         }
-        if (lifecycleClazz.equals(OnDestroyView.class)) {
-            //由于Fragment的绑定一般都在onCreateView中，所以认为onDestroyView，该Fragment的生命周期已结束
+
+        if (OnDestroyView.class.equals(lifecycleClazz) /*由于Fragment的绑定一般都在onCreateView中，所以认为onDestroyView，该Fragment的生命周期已结束*/
+                || OnDestroy.class.equals(lifecycleClazz) /* double check to avoid memory leak.*/
+                ) {
             FRAGMENT_CONTROLLER_MAP.remove(fragment);
         }
 
