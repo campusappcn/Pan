@@ -63,25 +63,9 @@ public class Pan<S extends FactoryViewModel> {
     /**
      * Controller会被加入到这里，从而对相应的Activity进行监听
      */
-    final static Map<Activity, List<GeneralController>> ACTIVITY_CONTROLLER_MAP = new HashMap<Activity, List<GeneralController>>() {
-        @Override
-        public List<GeneralController> get(Object key) {
-            if (null == super.get(key)) {
-                put((Activity) key, new ArrayList<GeneralController>());
-            }
-            return super.get(key);
-        }
-    };
+    final static Map<Activity, List<GeneralController>> ACTIVITY_CONTROLLER_MAP = new HashMap<>();
     // Fragment的控制器
-    final static Map<Fragment, List<GeneralController>> FRAGMENT_CONTROLLER_MAP = new HashMap<Fragment, List<GeneralController>>() {
-        @Override
-        public List<GeneralController> get(Object key) {
-            if (null == super.get(key)) {
-                put((Fragment) key, new ArrayList<GeneralController>());
-            }
-            return super.get(key);
-        }
-    };
+    final static Map<Fragment, List<GeneralController>> FRAGMENT_CONTROLLER_MAP = new HashMap<>();
 
 
     //Lifecycle class method cache
@@ -242,13 +226,22 @@ public class Pan<S extends FactoryViewModel> {
             controller = new NoopController();
         }
 
+        List<GeneralController> controllers;
         if (mFragment == null) {
-            ACTIVITY_CONTROLLER_MAP.get(mActivity).add(controller);
+            controllers = ACTIVITY_CONTROLLER_MAP.get(mActivity);
+            if(null == controllers){
+                ACTIVITY_CONTROLLER_MAP.put(mActivity, controllers = new ArrayList<>());
+            }
+            controllers.add(controller);
             if (controller instanceof LifecycleObserver.ForFragment && IS_DEBUG) {
                 LOG.warn("controller {} is observing to Fragment-only lifecycle, but use in an Activity context", controller.getClass().getSimpleName());
             }
         } else {
-            FRAGMENT_CONTROLLER_MAP.get(mFragment).add(controller);
+            controllers = FRAGMENT_CONTROLLER_MAP.get(mFragment);
+            if(null == controllers){
+                FRAGMENT_CONTROLLER_MAP.put(mFragment, controllers = new ArrayList<>());
+            }
+            controllers.add(controller);
             if (controller instanceof LifecycleObserver.ForActivity && IS_DEBUG) {
                 LOG.warn("controller {} is observing to Activity-only lifecycle, but use in a Fragment context", controller.getClass().getSimpleName());
             }
@@ -354,9 +347,12 @@ public class Pan<S extends FactoryViewModel> {
      */
     static <T extends LifecycleObserver> boolean call(Fragment fragment, Class<T> lifecycleClazz, Object... parameters) {
         boolean shouldCallSuper = true;
-        for (Controller controller : FRAGMENT_CONTROLLER_MAP.get(fragment)) {
-            shouldCallSuper = shouldCallSuper && checkAndCall(lifecycleClazz, controller, parameters);
-            callPlugins(lifecycleClazz, controller, parameters);
+        List<GeneralController> controllers = FRAGMENT_CONTROLLER_MAP.get(fragment);
+        if(null != controllers) {
+            for (Controller controller : controllers) {
+                shouldCallSuper = shouldCallSuper && checkAndCall(lifecycleClazz, controller, parameters);
+                callControllerPlugins(lifecycleClazz, controller, parameters);
+            }
         }
 
         if (OnDestroyView.class.equals(lifecycleClazz) /*由于Fragment的绑定一般都在onCreateView中，所以认为onDestroyView，该Fragment的生命周期已结束*/
@@ -389,9 +385,13 @@ public class Pan<S extends FactoryViewModel> {
      */
     static <T extends LifecycleObserver> boolean call(Activity activity, Class<T> lifecycleClazz, Object... parameters) {
         boolean shouldCallSuper = true;
-        for (Controller controller : ACTIVITY_CONTROLLER_MAP.get(activity)) {
-            shouldCallSuper = shouldCallSuper && checkAndCall(lifecycleClazz, controller, parameters);
-            callPlugins(lifecycleClazz, controller, parameters);
+        List<GeneralController> controllers = ACTIVITY_CONTROLLER_MAP.get(activity);
+
+        if(controllers != null) {
+            for (Controller controller : controllers) {
+                shouldCallSuper = shouldCallSuper && checkAndCall(lifecycleClazz, controller, parameters);
+                callControllerPlugins(lifecycleClazz, controller, parameters);
+            }
         }
 
         if (lifecycleClazz.equals(OnDestroy.class)) {
@@ -426,7 +426,7 @@ public class Pan<S extends FactoryViewModel> {
     }
 
 
-    private static <T extends LifecycleObserver> void callPlugins(Class<T> lifecycleClazz, Controller controller, Object[] parameters) {
+    private static <T extends LifecycleObserver> void callControllerPlugins(Class<T> lifecycleClazz, Controller controller, Object[] parameters) {
         for (ControllerLifecyclePlugin plugin : CONTROLLER_PLUGINS) {
             plugin.call(controller, lifecycleClazz, parameters);
         }

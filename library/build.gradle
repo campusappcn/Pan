@@ -32,11 +32,11 @@ dependencies {
 
     //user can choose to not use these support libraries.
     //not checked, for backward compatibility is of most importance currently
-    provided 'com.android.support:appcompat-v7:23.2.0'
-    provided 'com.android.support:support-v13:23.2.0'
-    provided 'com.android.support:recyclerview-v7:23.2.0'
+    provided 'com.android.support:appcompat-v7:23.3.0'
+    provided 'com.android.support:support-v13:23.3.0'
+    provided 'com.android.support:recyclerview-v7:23.3.0'
 
-    javadocDeps 'com.android.support:support-annotations:23.2.0'
+    javadocDeps 'com.android.support:support-annotations:23.3.0'
 }
 
 
