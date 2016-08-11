@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import cn.campusapp.library.BuildConfig;
 import cn.campusapp.library.R;
@@ -239,7 +240,7 @@ public class Pan<S extends FactoryViewModel> {
         } else {
             controllers = FRAGMENT_CONTROLLER_MAP.get(mFragment);
             if(null == controllers){
-                FRAGMENT_CONTROLLER_MAP.put(mFragment, controllers = new ArrayList<>());
+                FRAGMENT_CONTROLLER_MAP.put(mFragment, controllers = new CopyOnWriteArrayList<>());
             }
             controllers.add(controller);
             if (controller instanceof LifecycleObserver.ForActivity && IS_DEBUG) {
