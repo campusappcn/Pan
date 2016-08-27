@@ -231,7 +231,7 @@ public class Pan<S extends FactoryViewModel> {
         if (mFragment == null) {
             controllers = ACTIVITY_CONTROLLER_MAP.get(mActivity);
             if(null == controllers){
-                ACTIVITY_CONTROLLER_MAP.put(mActivity, controllers = new ArrayList<>());
+                ACTIVITY_CONTROLLER_MAP.put(mActivity, controllers = new CopyOnWriteArrayList<>());
             }
             controllers.add(controller);
             if (controller instanceof LifecycleObserver.ForFragment && IS_DEBUG) {

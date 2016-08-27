@@ -122,7 +122,7 @@ public class MainController extends GeneralController<MainViewModel>
 	}
 
 	dependencies {
-        compile 'com.github.campusappcn:Pan:0.9.3'
+        compile 'com.github.campusappcn:Pan:0.9.4'
 	}
 ```
 
