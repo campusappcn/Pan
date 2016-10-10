@@ -48,6 +48,7 @@ dependencies {
 }
 configurations.all({
     resolutionStrategy.force 'com.android.support:support-annotations:23.2.0'
+    resolutionStrategy.force 'com.android.support:support-v4:23.3.0'
 })
 
 //use lint --list see available issues

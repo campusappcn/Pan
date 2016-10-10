@@ -243,6 +243,14 @@ public class Pan<S extends FactoryViewModel> {
                 FRAGMENT_CONTROLLER_MAP.put(mFragment, controllers = new CopyOnWriteArrayList<>());
             }
             controllers.add(controller);
+
+            //controller may extends both Activity and Fragment Lifecycle
+            controllers = ACTIVITY_CONTROLLER_MAP.get(mActivity);
+            if(null == controllers){
+                ACTIVITY_CONTROLLER_MAP.put(mActivity, controllers = new ArrayList<>());
+            }
+            controllers.add(controller);
+
             if (controller instanceof LifecycleObserver.ForActivity && IS_DEBUG) {
                 LOG.warn("controller {} is observing to Activity-only lifecycle, but use in a Fragment context", controller.getClass().getSimpleName());
             }
