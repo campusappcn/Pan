@@ -4,7 +4,7 @@
 
 A light weight MV* framework to build android reusable UI components.
 
-[中文文档](http://blog.campusapp.cn/Pan-Documentation/)  [Javadoc](http://blog.campusapp.cn/Pan-Documentation/javadoc)
+[中文文档](http://campusappcn.github.io/Pan/)  [Javadoc](http://blog.campusapp.cn/Pan-Documentation/javadoc)
 
 完整的示例：直接运行源码中的[sample-github-users](https://github.com/campusappcn/Pan/tree/master/sample-github-users)
 
