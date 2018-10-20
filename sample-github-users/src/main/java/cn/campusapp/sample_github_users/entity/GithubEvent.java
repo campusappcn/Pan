@@ -9,7 +9,7 @@ import java.util.Map;
 
 /**
  * 事件实体类。
- * <p/>
+ * <p>
  * Created by nius on 4/12/16.
  */
 public class GithubEvent {

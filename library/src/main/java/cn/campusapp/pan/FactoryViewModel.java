@@ -16,7 +16,7 @@ import cn.campusapp.pan.annotaions.Xml;
 
 /**
  * 与ViewHolder紧密结合的ViewModel，适用于ViewModelFactory
- * <p/>
+ * <p>
  * Created by nius on 7/17/15.
  */
 public interface FactoryViewModel extends ViewModel {

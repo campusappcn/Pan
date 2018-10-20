@@ -25,7 +25,7 @@ import cn.campusapp.pan.lifecycle.OnStop;
 
 /**
  * support for AppCompatActivity
- * <p/>
+ * <p>
  * Created by nius on 10/27/15.
  */
 public class PanAppCompatActivity extends AppCompatActivity implements LifecycleObserved {

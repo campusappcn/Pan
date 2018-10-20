@@ -33,9 +33,9 @@ package cn.campusapp.pan.lifecycle;
  * <li>OnHiddenChanged</li>
  * <li>OnActivityCreated
  * </ul>
- * <p/>
+ * <p>
  * Observers can stop super call:
- * <p/>
+ * <p>
  * <ul>
  * <li>OnSavedInstanceState</li>
  * <li>OnRestoreInstanceState</li>
@@ -43,7 +43,7 @@ package cn.campusapp.pan.lifecycle;
  * <li>OnConfigurationChanged</li>
  * <li>OnActivityCreated</li>
  * </ul>
- * <p/>
+ * <p>
  * <p>
  * - Why not just FragmentController/ActivityController?
  * </p><p>
@@ -51,7 +51,7 @@ package cn.campusapp.pan.lifecycle;
  * So this way ensures controller will not be limited to choose Activity or Fragment in definition phase.
  * </p>
  * You can just make it polymorphism by using it in Activity or Fragment.
- * <p/>
+ * <p>
  * Created by nius on 7/23/15.
  */
 public interface LifecycleObserver {

@@ -3,7 +3,7 @@ package cn.campusapp.pan;
 
 /**
  * 控制器接口
- * <p/>
+ * <p>
  * Created by Jason on 2015/5/29.
  * @see GeneralController
  */

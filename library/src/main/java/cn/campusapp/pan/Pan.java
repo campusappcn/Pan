@@ -40,7 +40,7 @@ import cn.campusapp.pan.lifecycle.PanLifecyclePlugin;
  * 同时，如果该ViewModel已经通过Tag绑定到View上了，就使用之前绑定过的
  * </p>
  * <p>
- * <br/>
+ * <br>
  * <strong>Pan - 纪念我们的设计师</strong>
  * </p>
  * @param <S> 用于限定工厂对象的ViewModel

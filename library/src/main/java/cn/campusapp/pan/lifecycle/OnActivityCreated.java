@@ -4,7 +4,7 @@ import android.os.Bundle;
 
 /**
  * Fragment's corresponding OnRestoreInstanceState
- * <p/>
+ * <p>
  * Created by nius on 10/12/15.
  */
 public interface OnActivityCreated extends LifecycleObserver, LifecycleObserver.ForFragment {

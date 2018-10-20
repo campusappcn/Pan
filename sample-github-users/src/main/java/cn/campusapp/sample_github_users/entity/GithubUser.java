@@ -2,7 +2,7 @@ package cn.campusapp.sample_github_users.entity;
 
 /**
  * ref: https://developer.github.com/v3/users/
- * <p/>
+ * <p>
  * Created by nius on 4/12/16.
  */
 public class GithubUser {

@@ -10,9 +10,9 @@ import cn.campusapp.pan.lifecycle.LifecycleObserved;
 
 /**
  * 兼具ViewModel和ViewHolder功能
- * <p/>
+ * <p>
  * 需要一个无参构造方法
- * <p/>
+ * <p>
  * Created by nius on 7/17/15.
  */
 public abstract class GeneralViewModel implements FactoryViewModel {

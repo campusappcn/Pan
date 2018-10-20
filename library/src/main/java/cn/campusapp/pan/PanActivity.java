@@ -28,7 +28,7 @@ import cn.campusapp.pan.permissions.OnRequestPermissionsResult;
 /**
  * 用于监控生命周期
  * 以及用于调用对应的controller
- * <p/>
+ * <p>
  * Created by nius on 7/22/15.
  */
 public class PanActivity extends Activity implements LifecycleObserved, ActivityCompat.OnRequestPermissionsResultCallback {

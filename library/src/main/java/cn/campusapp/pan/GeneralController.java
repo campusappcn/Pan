@@ -37,9 +37,9 @@ public abstract class GeneralController<T extends FactoryViewModel> implements C
     /**
      * 绑定的事件
      * 也可以在此方法中进行一部分controller的初始化操作
-     * <p/>
+     * <p>
      * 可直接使用$vm对象，在内部类中获取$vm的状态
-     * <p/>
+     * <p>
      * 如果存在异步代码，且在Adapter/ViewHolder模式中使用，请注意绑定的$vm是否存在被更换的可能。如果$vm
      * 可变，那么需要在异步回调中，直接引用需要修改的数据对象，而不是通过$vm获得。可以参考sample-github-users的UserListController
      */

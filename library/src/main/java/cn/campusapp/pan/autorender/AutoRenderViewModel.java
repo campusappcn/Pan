@@ -34,8 +34,8 @@ public abstract class AutoRenderViewModel extends GeneralViewModel implements Au
     /**
      * mark the view model should be rendered on shown
      *
-     * @see {@link AutoRenderControllerLifecyclePlugin}
-     * @see {@link AutoRender}
+     * @see AutoRenderControllerLifecyclePlugin
+     * @see AutoRender
      */
     public GeneralViewModel autoRender(){
         mShouldRenderOnTrigger = true;
@@ -45,8 +45,8 @@ public abstract class AutoRenderViewModel extends GeneralViewModel implements Au
     /**
      * mark the view model whether should be rendered on shown
      *
-     * @see {@link AutoRenderControllerLifecyclePlugin}
-     * @see {@link AutoRender}
+     * @see AutoRenderControllerLifecyclePlugin
+     * @see AutoRender
      */
     @SuppressWarnings("unused")
     public GeneralViewModel autoRender(boolean shouldRenderOnTrigger){
