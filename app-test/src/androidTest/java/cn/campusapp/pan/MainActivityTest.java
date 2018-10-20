@@ -10,6 +10,7 @@ import org.junit.runner.RunWith;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.action.ViewActions.closeSoftKeyboard;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withTagKey;
@@ -55,6 +56,8 @@ public class MainActivityTest {
 
         onView(withTagValue(is(tag)))
                 .perform(click())
+                .perform(closeSoftKeyboard())// prevent Android :java.lang.SecurityException: Injecting to another application requires INJECT_EVENTS permission
+                                            // https://stackoverflow.com/questions/22163424/android-java-lang-securityexception-injecting-to-another-application-requires
                 .check(matches(withText("hello inner class")));
 
 

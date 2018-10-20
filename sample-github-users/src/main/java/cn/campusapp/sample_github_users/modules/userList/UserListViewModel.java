@@ -8,7 +8,8 @@ import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.Bind;
+
+import butterknife.BindView;
 import cn.campusapp.pan.GeneralViewModel;
 import cn.campusapp.pan.Pan;
 import cn.campusapp.pan.annotaions.Xml;
@@ -23,7 +24,7 @@ import cn.campusapp.sample_github_users.modules.user.UserViewModel;
 @Xml(R.layout.activity_main)
 public class UserListViewModel extends GeneralViewModel {
 
-    @Bind(R.id.user_list)
+    @BindView(R.id.user_list)
     public ListView vListView;
 
     protected List<GithubUser> mUsers = new ArrayList<>();

@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "25.0.0"
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
 
     defaultConfig {
         applicationId "cn.campusapp.pan"
         minSdkVersion 14
-        targetSdkVersion 23
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
 
@@ -26,29 +26,33 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(':library')
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(':library')
 
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.3.0'
-    compile 'com.android.support:support-v13:23.3.0'
-//    compile 'com.android.support:recyclerview-v7:23.2.0' //seems breaking the dependencies
+    //需要显示声明butterknife
+    implementation 'com.jakewharton:butterknife:9.0.0-rc1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:9.0.0-rc1'
 
-    androidTestCompile 'com.android.support.test:runner:0.4.1'
+    testImplementation 'junit:junit:4.12'
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support:support-v13:28.0.0'
+//    implementation 'com.android.support:recyclerview-v7:23.2.0' //seems breaking the dependencies
+
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
     // Set this dependency to use JUnit 4 rules
-    androidTestCompile 'com.android.support.test:rules:0.4.1'
+    androidTestImplementation 'com.android.support.test:rules:1.0.2'
     // Set this dependency to build and run Espresso tests
-    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     // Espresso-contrib for DatePicker, RecyclerView, Drawer actions, Accessibility checks, CountingIdlingResource
-    androidTestCompile 'com.android.support.test.espresso:espresso-contrib:2.2.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-contrib:3.0.2'
 
-    compile 'com.android.support.test.espresso:espresso-core:2.2.1' //for type token
+    implementation 'com.android.support.test.espresso:espresso-core:3.0.2' //for type token
 
-    compile 'com.arcao:slf4j-timber:2.1'
+    implementation 'com.arcao:slf4j-timber:2.1'
 }
 configurations.all({
-    resolutionStrategy.force 'com.android.support:support-annotations:23.2.0'
-    resolutionStrategy.force 'com.android.support:support-v4:23.3.0'
+    resolutionStrategy.force 'com.android.support:support-annotations:28.0.0'
+    resolutionStrategy.force 'com.android.support:support-v4:28.0.0'
 })
 
 //use lint --list see available issues

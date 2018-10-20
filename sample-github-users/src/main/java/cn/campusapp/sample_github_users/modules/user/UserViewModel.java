@@ -5,7 +5,8 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import butterknife.Bind;
+
+import butterknife.BindView;
 import cn.campusapp.pan.GeneralViewModel;
 import cn.campusapp.pan.annotaions.Xml;
 import cn.campusapp.sample_github_users.entity.GithubUser;
@@ -19,10 +20,10 @@ import static android.text.TextUtils.isEmpty;
 @Xml(R.layout.view_user)
 public class UserViewModel extends GeneralViewModel{
 
-    @Bind(R.id.user_avatar)
+    @BindView(R.id.user_avatar)
     public ImageView vAvatarView;
 
-    @Bind(R.id.user_name)
+    @BindView(R.id.user_name)
     public TextView vUserNameView;
 
     protected GithubUser mGithubUser;

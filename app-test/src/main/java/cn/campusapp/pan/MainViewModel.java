@@ -2,13 +2,13 @@ package cn.campusapp.pan;
 
 import android.widget.Button;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import cn.campusapp.pan.annotaions.Xml;
 
 @Xml(R.layout.view_component)
 public class MainViewModel extends GeneralViewModel {
 
-    @Bind(R.id.hello)
+    @BindView(R.id.hello)
     Button vHelloTv;
 
     String mHelloString;

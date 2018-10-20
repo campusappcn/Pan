@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import cn.campusapp.pan.GeneralViewModel;
 import cn.campusapp.pan.Pan;
 import cn.campusapp.pan.ViewModel;
@@ -34,7 +34,7 @@ public class UserDetailViewModel extends GeneralViewModel {
 
     List<Map<String, String>> mEvents = new ArrayList<>();
 
-    @Bind(R.id.event_list)
+    @BindView(R.id.event_list)
     public ListView vEventListView;
 
     protected BaseAdapter mEventAdapter;

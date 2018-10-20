@@ -10,14 +10,14 @@ import cn.campusapp.pan.GeneralViewModel;
  * <li>Fragment.setUserVisibleHint(true)</li>
  * </ol>
  * Configure it using {@link AutoRenderViewModel#autoRender()} and {@link AutoRenderViewModel#autoRender(boolean)}
- * <p/>
+ * <p>
  * Created by nius on 10/13/15.
  */
 public abstract class AutoRenderViewModel extends GeneralViewModel implements AutoRender {
 
     /**
      * Whether trigger render on shown, which in these cases:
-     * <p/>
+     *
      * 1. Activity.onResume
      * 2. Fragment.onResume
      * 3. Fragment.setUserVisibleHint(true)
