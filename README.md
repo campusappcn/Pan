@@ -1,4 +1,4 @@
-# Pan
+# Pan [![](https://jitpack.io/v/campusappcn/Pan.svg)](https://jitpack.io/#campusappcn/Pan)
 
 <img alt='Pan logo android MVW框架' src='https://img.alicdn.com/imgextra/i1/56380417/TB20PmhnXXXXXXPXpXXXXXXXXXX_!!56380417.png' width="180px">
 
@@ -122,7 +122,11 @@ public class MainController extends GeneralController<MainViewModel>
 	}
 
 	dependencies {
-        compile 'com.github.campusappcn:Pan:0.9.3'
+        implementation 'com.github.campusappcn:Pan:0.9.8'
+        
+        //需要显式声明annotation processor
+        implementation 'com.jakewharton:butterknife:9.0.0-rc1'
+        annotationProcessor 'com.jakewharton:butterknife-compiler:9.0.0-rc1'
 	}
 ```
 
