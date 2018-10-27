@@ -29,7 +29,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     implementation 'com.jakewharton:butterknife:9.0.0-rc1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:9.0.0-rc1'
-    api 'org.slf4j:slf4j-api:1.7.12'
+    compileOnly 'org.slf4j:slf4j-api:1.7.12'
 
     //user can choose to not use these support libraries.
     //not checked, for backward compatibility is of most importance currently
