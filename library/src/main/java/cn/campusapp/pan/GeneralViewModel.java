@@ -27,32 +27,32 @@ public abstract class GeneralViewModel implements FactoryViewModel {
     }
 
     @Override
-    public GeneralController getController() {
+    public final GeneralController getController() {
         return mController;
     }
 
     @Override
-    public void setController(GeneralController c) {
+    public final void setController(GeneralController c) {
         mController = c;
     }
 
     @Override
-    public Activity getActivity() {
+    public final Activity getActivity() {
         return mActivity;
     }
 
     @Override
-    public void setActivity(Activity activity) {
+    public final void setActivity(Activity activity) {
         mActivity = activity;
     }
 
     @Override
-    public Fragment getFragment() {
+    public final Fragment getFragment() {
         return mFragment;
     }
 
     @Override
-    public void setFragment(Fragment fragment) {
+    public final void setFragment(Fragment fragment) {
         mFragment = fragment;
     }
 
@@ -62,7 +62,7 @@ public abstract class GeneralViewModel implements FactoryViewModel {
      *
      * @return Activity/Fragment currently observing
      */
-    public LifecycleObserved getObserving() {
+    public final LifecycleObserved getObserving() {
         if (mFragment != null) {
             return (LifecycleObserved) mFragment;
         }
@@ -77,11 +77,11 @@ public abstract class GeneralViewModel implements FactoryViewModel {
      *
      * @return the root view of the view model binds to
      */
-    public View getRootView() {
+    public final View getRootView() {
         return mRootView;
     }
 
-    public void setRootView(View rootView) {
+    public final void setRootView(View rootView) {
         mRootView = rootView;
     }
 
