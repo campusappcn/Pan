@@ -181,6 +181,7 @@ public class Pan<S extends FactoryViewModel> {
 
             S vm;
 
+            // create viewmodel and view
             if(mViewModel == null) {
                 vm = mViewFactory.createViewAndViewModel(mViewModelClazz, mActivity, view, container, attach);
             }else{
@@ -192,12 +193,15 @@ public class Pan<S extends FactoryViewModel> {
 
             vm.setActivity(mActivity);
             vm.setFragment(mFragment); //set fragment
+
+            //butterknife
             vm.bindViews();
 
             //set tag for view holder pattern
             view = vm.getRootView();
             view.setTag(findProperTagKey(view), vm);
 
+            // create controller and bind it
             bindController(vm);
 
             return vm;
@@ -208,6 +212,39 @@ public class Pan<S extends FactoryViewModel> {
     }
 
     private void bindController(S vm) {
+
+        GeneralController controller = createControllerIfNecessary(vm);
+
+        registerController(controller);
+
+        //noinspection unchecked
+        controller.bindViewModel(vm);
+        vm.setController(controller);
+    }
+
+    private void registerController(GeneralController controller) {
+        if (mFragment == null) {
+
+            addToActivityControllerMap(controller);
+
+            if (controller instanceof LifecycleObserver.ForFragment && IS_DEBUG) {
+                LOG.warn("controller {} is observing to Fragment-only lifecycle, but use in an Activity context", controller.getClass().getSimpleName());
+            }
+        } else {
+
+            addToFramgentControllerMap(controller);
+
+            //controller may extends both Activity and Fragment Lifecycle
+            addToActivityControllerMap(controller);
+
+            if (controller instanceof LifecycleObserver.ForActivity && IS_DEBUG) {
+                LOG.warn("controller {} is observing to Activity-only lifecycle, but use in a Fragment context", controller.getClass().getSimpleName());
+            }
+        }
+    }
+
+    @NonNull
+    private GeneralController createControllerIfNecessary(S vm) {
         GeneralController controller;
 
         if(mController != null){
@@ -226,39 +263,25 @@ public class Pan<S extends FactoryViewModel> {
         if(controller == null){
             controller = new NoopController();
         }
+        return controller;
+    }
 
+    private void addToFramgentControllerMap(GeneralController controller) {
         List<GeneralController> controllers;
-        if (mFragment == null) {
-            controllers = ACTIVITY_CONTROLLER_MAP.get(mActivity);
-            if(null == controllers){
-                ACTIVITY_CONTROLLER_MAP.put(mActivity, controllers = new CopyOnWriteArrayList<>());
-            }
-            controllers.add(controller);
-            if (controller instanceof LifecycleObserver.ForFragment && IS_DEBUG) {
-                LOG.warn("controller {} is observing to Fragment-only lifecycle, but use in an Activity context", controller.getClass().getSimpleName());
-            }
-        } else {
-            controllers = FRAGMENT_CONTROLLER_MAP.get(mFragment);
-            if(null == controllers){
-                FRAGMENT_CONTROLLER_MAP.put(mFragment, controllers = new CopyOnWriteArrayList<>());
-            }
-            controllers.add(controller);
-
-            //controller may extends both Activity and Fragment Lifecycle
-            controllers = ACTIVITY_CONTROLLER_MAP.get(mActivity);
-            if(null == controllers){
-                ACTIVITY_CONTROLLER_MAP.put(mActivity, controllers = new CopyOnWriteArrayList<>());
-            }
-            controllers.add(controller);
-
-            if (controller instanceof LifecycleObserver.ForActivity && IS_DEBUG) {
-                LOG.warn("controller {} is observing to Activity-only lifecycle, but use in a Fragment context", controller.getClass().getSimpleName());
-            }
+        controllers = FRAGMENT_CONTROLLER_MAP.get(mFragment);
+        if(null == controllers){
+            FRAGMENT_CONTROLLER_MAP.put(mFragment, controllers = new CopyOnWriteArrayList<>());
         }
+        controllers.add(controller);
+    }
 
-        //noinspection unchecked
-        controller.bindViewModel(vm);
-        vm.setController(controller);
+    private void addToActivityControllerMap(GeneralController controller) {
+        List<GeneralController> controllers;
+        controllers = ACTIVITY_CONTROLLER_MAP.get(mActivity);
+        if(null == controllers){
+            ACTIVITY_CONTROLLER_MAP.put(mActivity, controllers = new CopyOnWriteArrayList<>());
+        }
+        controllers.add(controller);
     }
 
 
@@ -297,7 +320,6 @@ public class Pan<S extends FactoryViewModel> {
             }
         }
 
-
         //check if is in pre defined tags
         for(int i=0; i<TAGS_PRE_DEFINED.length; i++){
             Object object = view.getTag(TAGS_PRE_DEFINED[i]);
@@ -306,6 +328,31 @@ public class Pan<S extends FactoryViewModel> {
             }
         }
 
+        return null;
+    }
+
+    /**
+     * 通过tag
+     * 获取特定类型的ViewModel
+     *
+     * Pan会为每个ViewModel的rootView绑定tag，并最多绑定10个ViewModel到View上
+     *
+     * @param view root view
+     * @param clazz 类型
+     * @return 绑定的传入的类型的ViewModel对象，可能为null
+     */
+    @SuppressWarnings("unchecked")
+    @Nullable
+    public static  <V> V retrieveViewModel(View view, Class<V> clazz){
+        if(view == null || clazz == null){
+            return null;
+        }
+        for(int i=0; i<TAGS_PRE_DEFINED.length; i++){
+            Object object = view.getTag(TAGS_PRE_DEFINED[i]);
+            if(clazz.isInstance(object)){
+                return ((V) object);
+            }
+        }
         return null;
     }
 
