@@ -25,7 +25,7 @@ public abstract class RecyclerViewModel extends RecyclerView.ViewHolder implemen
     }
 
     @Override
-    public final GeneralController getController() {
+    public GeneralController getController() {
         return mController;
     }
 

@@ -27,7 +27,7 @@ public abstract class GeneralViewModel implements FactoryViewModel {
     }
 
     @Override
-    public final GeneralController getController() {
+    public GeneralController getController() {
         return mController;
     }
 
